@@ -15,7 +15,17 @@
     </q-header>
 
     <q-drawer show-if-above v-model="leftDrawerOpen" side="left" elevated>
-      <!-- drawer content -->
+      <NavBarButton label="HOME" :onClickFunction="() => goToRoute('/home')"></NavBarButton>
+      <NavBarButton label="APPRENTICES" :onClickFunction="() => goToRoute('/home/apprentices')"></NavBarButton>
+      <NavBarButton label="ASSIGNMENTS" :onClickFunction="() => goToRoute('/home/assignments')"></NavBarButton>
+      <NavBarButton label="BINNACLES" :onClickFunction="() => goToRoute('/home/binnacles')"></NavBarButton>
+      <NavBarButton label="FICHES" :onClickFunction="() => goToRoute('/home/fiches')"></NavBarButton>
+      <NavBarButton label="FOLLOWUP'S" :onClickFunction="() => goToRoute('/home/followups')"></NavBarButton>
+      <NavBarButton label="MODALITY" :onClickFunction="() => goToRoute('/home/modalities')"></NavBarButton>
+      <NavBarButton label="REGISTER" :onClickFunction="() => goToRoute('/home/registers')"></NavBarButton>
+      <NavBarButton label="USER" :onClickFunction="() => goToRoute('/home/userep')"></NavBarButton>
+
+
     </q-drawer>
 
     <q-page-container class="page-no-margin">
@@ -38,6 +48,8 @@
 
 <script setup>
 import { ref } from 'vue';
+import NavBarButton from '@/components/buttons/NavBarButton.vue';
+import goToRoute from '@/utils/goToRouteFunction.js'
 
 const leftDrawerOpen = ref(false);
 const isLoading = ref(false);
@@ -61,6 +73,6 @@ const toggleLeftDrawer = () => {
 .card-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px; /* Espacio entre las cards */
+  gap: 16px; /* Espacio entre las cards */
 }
 </style>
