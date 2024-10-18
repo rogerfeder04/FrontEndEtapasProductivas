@@ -5,6 +5,11 @@ import { fileURLToPath, URL } from 'node:url';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      external: ['@fortawesome/vue-fontawesome']
+    }
+  },
   plugins: [
     vue({
       template: { transformAssetUrls }
