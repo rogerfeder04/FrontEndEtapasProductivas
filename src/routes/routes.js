@@ -1,13 +1,13 @@
-import Apprentices from "../views/Apprentices.vue";
-import Assignments from "../views/Assignments.vue";
-import Binnacles from "../views/Binnacles.vue";
-import Fiches from "../views/Fiches.vue";
-import Followups from "../views/Followup.vue";
-import Home from "../views/Home.vue";
-import Modality from "../views/Modality.vue";
-import Register from "../views/Register.vue";
-import UserEPLogin from "../views/UserEPlogin.vue";
-import RecoverPassword from "../views/RecoverPassword.vue";
+import Apprentices from "@/views/Apprentices.vue";
+import Assignments from "@/views/Assignments.vue";
+import Binnacles from "@/views/Binnacles.vue";
+import Fiches from "@/views/Fiches.vue";
+import Followups from "@/views/Followup.vue";
+import Home from "@/views/Home.vue";
+import Modality from "@/views/Modality.vue";
+import Register from "@/views/Register.vue";
+import UserEPLogin from "@/views/UserEPlogin.vue";
+import RecoverPassword from "@/views/RecoverPassword.vue";
 
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/useAuth.js";
