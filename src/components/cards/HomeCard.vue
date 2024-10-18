@@ -1,7 +1,7 @@
 <template>
     <q-card class="myCard" flat bordered @click="goToRoute(route)">
       <div class="flexContainer">
-        <q-img :src="imgSrc" class="flexImg" />
+        <q-img :src="imgSrc" />
       </div>
       <q-card-section class="flexContent">
         <div class="text-h6 q-mt-sm q-mb-xs">{{ title }}</div>
@@ -29,24 +29,27 @@ const router = useRouter();
     }
   });
   
-  const goToRoute = (route) => {
-    router.push(route);
-  };
+  const goToRoute = () => {
+  if (props.route) {
+    router.push({ path: props.route }).catch(err => {
+      if (err.name !== 'NavigationDuplicated') {
+        throw err;
+      }
+    });
+  }
+};
   </script>
   
   <style scoped>
   .myCard {
     width: 100%;
-    max-width: 400px;
+    cursor: pointer;
   }
   .flexContainer {
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 16px;
-  }
-  .flexImg {
-    max-width: 150px;
   }
   .flexContent {
     text-align: center;

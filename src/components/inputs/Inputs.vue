@@ -1,9 +1,11 @@
+
 <template>
     <div class="input-container">
       <q-input
         filled
         :id="id"
-        :type="type"
+        :rules="[val => !!val || 'Este campo es obligatorio']"
+        :type="showPassword ? 'text' : type"
         v-model="internalValue"
         :placeholder="placeholder"
         :class="['input-styled', { 'input-error': hasError }]"
@@ -11,6 +13,14 @@
     <template v-slot:prepend>
       <font-awesome-icon :icon="icon"/>
     </template> 
+    <template v-slot:append>
+        <q-icon 
+          v-if="type === 'password'"
+          :name="showPassword ? 'visibility' : 'visibility_off'"
+          @click="togglePasswordVisibility"
+          class="cursor-pointer"
+        />
+      </template>
   </q-input>
       
 
@@ -24,8 +34,12 @@
   </template>
   
   <script setup>
-  import { computed } from 'vue';
-  
+  import { computed, ref } from 'vue';
+  import { QIcon } from 'quasar';
+
+  const hasError = ref(false);
+  const showPassword = ref(false);
+  const emit = defineEmits(['update:modelValue']);
   const props = defineProps({
     id: {
       type: String,
@@ -43,7 +57,7 @@
     },
     type: {
       type: String,
-      default: 'text', // 'text', 'password', 'email', etc.
+      default: 'text',
     },
     errorMessage: {
       type: String,
@@ -63,6 +77,10 @@
     emit('update:modelValue', value);
   }
 });
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
   </script>
   
   <style scoped>
@@ -77,6 +95,8 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     transition: border-color 0.2s;
+    padding: 0px;
+    margin-bottom: 2%;
   }
   
   .input-styled:focus {

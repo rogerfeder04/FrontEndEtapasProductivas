@@ -1,42 +1,62 @@
 <template>
-  <div class="q-pa-md">
-    <Layout />
+  <q-layout view="lHh Lpr lff" class="layout">
+    <q-page-container>
+    <Header
+      :title="'REPFORA'"
+      :drawerOpen="drawerOpen"
+      @toggleDrawer="toggleDrawer"
+    ></Header>
+    <Sidebar 
+      :drawerOpen="drawerOpen" 
+      @update:drawerOpen="toggleDrawer"
+    />
+
     <div class="card-container">
       <Card 
         v-for="(item, index) in cardData" 
         :key="index" 
         :route="item.route" 
-        :imgSrc="item.imgSrc" 
+        :imgSrc="item.imgSrc"
         :title="item.title" 
+        class="card"
       />
   </div>
-    </div>
+</q-page-container>
+</q-layout>
 </template>
 
 <script setup>
-import Layout from "@/components/layouts/Layout.vue";
-import Card from "@/components/cards/HomeCard.vue";
 import { ref } from "vue";
 
-// Define card data
-const cardData = ref([
-  { route: "/Home/Apprentices", imgSrc: "../assets/Images/Logo-Fichas.png", title: "Apprentices" },
-  { route: "/Home/Ficha", imgSrc: "../assets/Images/Logo-Fichas.png", title: "Assignments" },
-  { route: "/Home/Ficha", imgSrc: "../assets/Images/Logo-Fichas.png", title: "Binnacles" },
-  { route: "/Home/Ficha", imgSrc: "../assets/Images/Logo-Fichas.png", title: "Fiches" },
-  { route: "/Home/Ficha", imgSrc: "../assets/Images/Logo-Fichas.png", title: "Followups" },
-  { route: "/Home/Ficha", imgSrc: "../assets/Images/Logo-Fichas.png", title: "Modality" },
-  { route: "/Home/Ficha", imgSrc: "../assets/Images/Logo-Fichas.png", title: "Register" },
-  { route: "/Home/Ficha", imgSrc: "../assets/Images/Logo-Fichas.png", title: "UserEP" },
+import Header from "@/components/layouts/Header.vue";
+import Sidebar from "@/components/layouts/Sidebar.vue";
+import Card from "@/components/cards/HomeCard.vue";
+import qDrawerImage from "@/assets/images/qDrawerImage.jpg"
 
+const cardData = ref([
+  { route: "/apprentices", imgSrc: qDrawerImage, title: "Apprentices" },
+  { route: "/assignments", imgSrc: qDrawerImage, title: "Assignments" },
+  { route: "/binnacles", imgSrc: qDrawerImage, title: "Binnacles" },
+  { route: "/fiches", imgSrc: qDrawerImage, title: "Fiches" },
+  { route: "/followups", imgSrc: qDrawerImage, title: "Followups" },
+  { route: "/modalities", imgSrc: qDrawerImage, title: "Modality" },
+  { route: "/registers", imgSrc: qDrawerImage, title: "Register" },
+  { route: "/usersep", imgSrc: qDrawerImage, title: "UserEP" },
 ]);
+
+const drawerOpen = ref(false);
+
+function toggleDrawer() {
+drawerOpen.value = !drawerOpen.value;
+}
+
 </script>
 
-<!-- <style scoped>
+<style scoped>
 .card-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  }
-
-</style> -->
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Para que se ajuste al tamaño */
+  gap: 20px;
+  padding: 20px;
+}
+</style>
