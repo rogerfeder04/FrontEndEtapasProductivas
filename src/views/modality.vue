@@ -49,14 +49,14 @@ const columns = ref([
     name: "hourInstructorFollow",
     align: "center",
     label: "Horas Instructor de Seguimiento",
-    field: "hourInstructorFollow",
+    field: "hourInstructorFollow" || "No aplica",
     sortable: true,
   },
   {
     name: "hourInstructorTechnical",
     label: "Horas Instructor Técnico",
     align: "center",
-    field: "hourInstructorTechnical",
+    field: "hourInstructorTechnical" || "No aplica",
     sortable: true,
   },
   {

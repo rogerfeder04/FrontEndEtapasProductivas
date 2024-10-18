@@ -86,7 +86,7 @@ const columns = ref([
 },
 {
   name: "judymentPhoto",
-  label: "judymentPhoto",
+  label: "Foto del Juicio",
   align: "center",
   field: "judymentPhoto",
   sortable: true,
