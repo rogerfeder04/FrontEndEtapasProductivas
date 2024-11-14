@@ -23,7 +23,8 @@ import { faPenToSquare, faBan, faCheck, faFileInvoice, faSpellCheck,
   faHouse, faPeopleArrows, faSquarePollHorizontal, faReceipt, faMagnifyingGlassChart,
   faShapes, faFile, faChalkboardUser,faPersonChalkboard, faStreetView, faImage,
   faListOl, faEnvelopeOpenText, faBuilding, faMapLocationDot, faUserTie, faStopwatch,
-  faClock, faCircleCheck
+  faClock, faCircleCheck, faCirclePlus, faEye, faRightToBracket, faHourglassHalf,
+  faMagnifyingGlass, faFileArrowUp, faCircleRight, faRectangleList, faArrowLeft,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Añadir el ícono a la librería de Font Awesome
@@ -33,7 +34,8 @@ library.add(faPenToSquare, faBan, faCheck, faFileInvoice, faSpellCheck,
   faPeopleArrows, faSquarePollHorizontal, faReceipt, faMagnifyingGlassChart,
 faShapes, faFile, faChalkboardUser, faPersonChalkboard, faStreetView, faImage,
 faListOl, faEnvelopeOpenText, faBuilding, faMapLocationDot, faUserTie, faStopwatch,
-faClock, faCircleCheck
+faClock, faCircleCheck, faCirclePlus, faEye, faRightToBracket, faHourglassHalf,
+faMagnifyingGlass, faFileArrowUp,faCircleRight, faRectangleList, faArrowLeft,
 
 );
     

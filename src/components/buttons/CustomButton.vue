@@ -1,16 +1,24 @@
 <template>
-    <div>
+    <div class="customButtonContainer">
         <q-btn 
             :class="[btnStyles, props.class]"            
             :color="color"
             :text-color="textColor"
             :disable="loading"
             @click="handleClick"
-            style="font-weight: bold;"
+            :type="type"
         >
-        <template v-if="!loading">
+        <div id="contentButton">
+        <font-awesome-icon 
+        :icon="icon" 
+        style="font-size: 22px;"
+        v-if="!loading"
+        />
+
+        <span v-if="!loading" id="customButtonLabel">
             {{ props.label }}
-      </template>
+      </span>
+      
       <template v-else>
         <CustomSpinner 
           :visible="loading" 
@@ -18,6 +26,7 @@
           colorSpinner="white"
         />
       </template>
+    </div>
         </q-btn>
     </div>
 </template>
@@ -49,6 +58,13 @@ const props = defineProps({
     },
     class:{
         type: String,
+    },
+    icon: {
+    type: Array,
+  },
+  type: {
+      type: String,
+      default: 'button'
     }
 })
 
@@ -68,7 +84,7 @@ const handleClick = async () => {
 <style scoped>
 .btnStyles {
     margin: 2% !important;
-    border: none; /* Sin bordes visibles */
+    font-weight: bold;
 }
 
 .btnStyles:disabled {
@@ -76,5 +92,13 @@ const handleClick = async () => {
   opacity: 1 !important; /* Evita que se haga transparente */
   border-color: inherit !important; /* Mantiene el borde */
   min-width: 105px !important;
+}
+
+#customButtonLabel {
+  margin-left: 8px;
+}
+
+#contentButton {
+  white-space: nowrap;
 }
 </style>

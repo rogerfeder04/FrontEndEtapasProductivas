@@ -2,16 +2,31 @@
     <div>
       <q-btn
        @click="handleClick" 
+       :disable="loading"
        id="button"
        flat
        :style="{ backgroundColor: backgroundColor }"
        >
-       <font-awesome-icon :icon="icon" style="font-size: 20px; color: white;"/>
+       <font-awesome-icon v-if="!loading"
+        :icon="icon" 
+        style="font-size: 
+        20px; color: white;"
+        />
+        <CustomSpinner 
+          v-else
+          :visible="loading" 
+          size="20px" 
+          colorSpinner="white"
+        />
       </q-btn>
-    </div>
-  </template>
-  
-  <script setup>
+      </div>
+      </template>
+      
+<script setup>
+import { ref } from "vue";
+import CustomSpinner from "@/components/spinners/CustomSpinner.vue";
+
+const loading = ref(false);
   const props = defineProps({
     icon: {
       type: Array,
@@ -24,13 +39,20 @@
       type: String,
       default: "var(--q-primary)",
     },
+    loading: {
+    type: Boolean,
+    default: false,
+  },
   });
   
-  function handleClick() {
-  if (props.onClick) {
-    props.onClick();
+  const handleClick = async () => {
+  loading.value = true;
+  if (typeof props.onClick === 'function') {
+    await props.onClick();
   }
-}
+  loading.value = false;
+};
+
   </script>
   
   <style scoped>

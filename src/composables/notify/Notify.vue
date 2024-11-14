@@ -1,7 +1,7 @@
 <script>
 import { Notify } from "quasar";
 
-export const notifyErrorRequest = (msg, position = "bottom") => {
+export const notifyErrorRequest = (msg, position = "top") => {
   Notify.create({
     color: "negative",
     message: msg,
@@ -11,7 +11,7 @@ export const notifyErrorRequest = (msg, position = "bottom") => {
   });
 };
 
-export const notifySuccessRequest = (msg, position = "bottom") => {
+export const notifySuccessRequest = (msg, position = "top") => {
   Notify.create({
     color: "positive",
     message: msg,
@@ -21,7 +21,7 @@ export const notifySuccessRequest = (msg, position = "bottom") => {
   });
 };
 
-export const notifyWarningRequest = (msg, position = "bottom") => {
+export const notifyWarningRequest = (msg, position = "top") => {
   Notify.create({
     color: "warning",
     message: msg,

@@ -36,8 +36,7 @@
   
   <script setup>
   import { computed, ref } from 'vue';
-  import { QIcon } from 'quasar';
-
+  
   const hasError = ref(false);
   const showPassword = ref(false);
   const emit = defineEmits(['update:modelValue']);

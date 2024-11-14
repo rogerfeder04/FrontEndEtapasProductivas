@@ -2,7 +2,6 @@
     <q-layout view="lHh Lpr lff" class="layout">
       <q-page-container>
       <Header
-        :title="'REPFORA'"
         :drawerOpen="drawerOpen"
         @toggleDrawer="toggleDrawer"
       ></Header>
@@ -11,49 +10,86 @@
         @update:drawerOpen="toggleDrawer"
       />
 
-      <CustomButton label="CREAR REGISTRO" :onClickFunction="openDialog">
+      <br>
+
+      <div class="table-container">
+        <h5>{{ title }}</h5>
+
+        <div style="display:flex; align-items: center !important;">
+        <q-btn  to="/home" dense unelevated round color="primary" icon="arrow_back" text-color="white" />
+        <hr 
+          id="hr" 
+          color="primary"
+        >
+      </div>
+
+      <CustomButton
+       label="CREAR REGISTRO" 
+       :onClickFunction="openDialog"
+       :icon="['fa', 'circle-plus']"
+       >
       </CustomButton>
 
-    <div class="table-container">
       <Table
         :rows="rows"
         :columns="columns"
-        :title="title"
         :onClickEdit="openDialog"
-        :onClickActivate="toggleEstado"
+        :onClickActivate="toggleStatus"
       ></Table>
     </div>
 
-    <CustomModal
+
+
+    <FormModal
         :modelValue="dialog"
         :title="dialogTitle"
-        :onSave="saveRegister"
         @update:modelValue="dialog = $event"
+        :next="nextFormModal"
       >
         <template #content>
           <div class="input-grid">
-          <q-select
-            id="idApprentice"
-            filled
-            label="Seleccione el Aprendiz"
-            v-model="idApprentice"
-            required
-            errorMessage="Aprendiz requerido"
-            icon="user-graduate"
-            type="text"
-          />
+          <CustomSelect
+              map-options
+              label="Seleccionar modalidad"
+              v-model="modalityId"
+              required
+              :options="modalitiesOptions"
+              optionLabel="name"
+              optionValue="_id"
+              errorMessage="Modalidad requerida"
+              icon="shapes"
+              type="text"
+            >
+            </CustomSelect>
+          
+        </div>
+        </template>
+      </FormModal>
 
-          <q-select
-            id="idModality"
-            filled
-            label="Seleccione la Modalidad"
-            v-model="idModality"
-            required
-            errorMessage="Modalidad requerida"
-            icon="shapes"
-            type="text"
-          />
-          <InputLog
+    <FormModal
+        :modelValue="secondModaldialog"
+        :title="dialogTitle"
+        :onSave="saveRegister"
+        @update:modelValue="secondModaldialog = $event"
+      >
+        <template #content>
+          <div class="input-grid">
+            <CustomSelect
+              map-options
+              label="Aprendiz"
+              v-model="apprentice"
+              @filter="filterApprentice"
+              required
+              :options="apprenticeOptions"
+              optionLabel="apprenticeName"
+              optionValue="apprenticeId"
+              errorMessage="Aprendiz requerido"
+              icon="users-line"
+              type="text"
+            >
+            </CustomSelect>
+
+          <Input
             id="startDate"
             filled
             label="Fecha de Inicio"
@@ -63,7 +99,7 @@
             icon="calendar-days"
             type="date"
           />
-          <InputLog
+          <Input
             id="endDate"
             filled
             label="Fecha de Fin"
@@ -73,7 +109,7 @@
             icon="calendar-days"
             type="date"
           />
-          <InputLog
+          <Input
             id="company"
             filled
             label="Nombre de la Empresa"
@@ -83,7 +119,7 @@
             icon="spell-check"
             type="text"
           />
-          <InputLog
+          <Input
             id="phoneCompany"
             filled
             label="Teléfono de la empresa"
@@ -93,7 +129,7 @@
             icon="phone"
             type="text"
           />
-          <InputLog
+          <Input
             id="addressCompany"
             filled
             label="Dirección de la empresa"
@@ -103,7 +139,7 @@
             icon="map-location-dot"
             type="text"
           />
-          <InputLog
+          <Input
             id="owner"
             filled
             label="Dueño de la Empresa"
@@ -113,7 +149,7 @@
             icon="user-tie"
             type="text"
           />
-          <InputLog
+          <Input
             id="docAlternative"
             filled
             label="Documento Alternativo"
@@ -123,7 +159,7 @@
             icon="file-invoice"
             type="text"
           />
-          <InputLog
+          <Input
             id="hour"
             filled
             label="Horas"
@@ -133,7 +169,7 @@
             icon="clock"
             type="text"
           />
-          <InputLog
+          <Input
             id="businessProyectHour"
             filled
             label="Horas del Proyecto de Negocio"
@@ -143,7 +179,7 @@
             icon="stopwatch"
             type="text"
           />
-          <InputLog
+          <Input
             id="productiveProjectHour"
             filled
             label="Horas del Proyecto Productivo"
@@ -153,7 +189,7 @@
             icon="stopwatch"
             type="text"
           />
-          <InputLog
+          <Input
             id="mailCompany"
             filled
             label="Email de la empresa"
@@ -165,8 +201,9 @@
           />
         </div>
         </template>
-      </CustomModal>
+      </FormModal>
   </q-page-container>
+  <Footer></Footer>
 </q-layout>
 </template>
 
@@ -175,21 +212,28 @@ import { ref, onBeforeMount } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
-import Table from "@/components/tables/Table.vue";
+import Footer from "@/components/layouts/Footer.vue";
+import Table from "@/components/tables/TableWithButtons.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
-import CustomModal from "../components/modals/CustomModal.vue";
-import InputLog from "@/components/inputs/Inputs.vue";
+import CustomSelect from "@/components/inputs/CustomSelect.vue";
+import FormModal from "@/components/modals/FormModal.vue";
+import Input from "@/components/inputs/CustomInput.vue";
 import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
 
 import { getData, postData } from "@/services/apiClient.js";
 
-const title = ref("REGISTROS");
+const title = ref("REGISTRO EP");
 const dialog = ref(false);
-const dialogTitle = ref("CREAR REGISTRO");
+const secondModaldialog = ref(false);
+const dialogTitle = ref("SELECCIONE MODALIDAD");
+const drawerOpen = ref(true);
+
+const modalitiesOptions = ref([]);
+const apprenticeOptions = ref([]);
 
 //v-models de los inputs
 const idApprentice = ref("");
-const idModality = ref("");
+const modalityId = ref("");
 const startDate = ref("");
 const endDate = ref("");
 const company = ref("");
@@ -204,7 +248,7 @@ const mailCompany = ref("");
 
 const registerData = {
   idApprentice: idApprentice.value,
-  idModality: idModality.value,
+  modalityId: modalityId.value,
   startDate: startDate.value,
   endDate: endDate.value,
   company: company.value,
@@ -220,10 +264,54 @@ const registerData = {
 
 const rows = ref([]);
 const columns = ref([
+{
+    name: "numberList",
+    required: true,
+    label: "N°",
+    align: "center",
+    field: "numberList",
+  },
+  {
+    name: "name",
+    required: true,
+    label: "NOMBRE APRENDIZ",
+    align: "center",
+    field: "apprenticeName",
+    sortable: true,
+  },
+  {
+    name: "ficheNumber",
+    required: true,
+    label: "COD. FICHA",
+    align: "center",
+    field: "ficheNumber",
+    sortable: true,
+  },
+  {
+    name: "ficheName",
+    required: true,
+    label: "FICHA",
+    align: "center",
+    field: "ficheName",
+    sortable: true,
+  },
+  {
+    name: "modality",
+    align: "center",
+    label: "MODALIDAD",
+    field: "modalityName",
+    sortable: true,
+  },
+  {
+    name: "magnifyingGlassButton",
+    align: "center",
+    label: "ASIGNACION",
+    sortable: true,
+  },
   {
     name: "startDate",
     required: true,
-    label: "Fecha de Inicio",
+    label: "FECHA INICIO",
     align: "center",
     field: "startDate",
     sortable: true,
@@ -231,85 +319,93 @@ const columns = ref([
   {
     name: "endDate",
     align: "center",
-    label: "Fecha Fin",
+    label: "FECHA FIN",
     field: "endDate",
     sortable: true,
   },
   {
-    name: "company",
-    label: "Empresa",
+    name: "eyeButton",
     align: "center",
-    field: "company",
+    label: "DETALLES",
+  },
+  {
+    name: "secondEyeButton",
+    align: "center",
+    label: "REGISTRO HORAS",
+  },
+  {
+    name: "status",
+    align: "center",
+    label: "ESTADO",
+    field: "endDate",
     sortable: true,
   },
   {
-    name: "phoneCompany",
-    label: "Telefono de la Empresa",
-    align: "center",
-    field: "phoneCompany",
-    sortable: true,
-  },
-  {
-    name: "addressCompany",
-    align: "center",
-    label: "Dirección de la Empresa",
-    field: "addressCompany",
-    sortable: true,
-  },
-  {
-    name: "owner",
-    align: "center",
-    label: "Dueño de la empresa",
-    field: "owner",
-    sortable: true,
-  },
-  {
-    name: "docAlternative",
-    label: "Documento Alternativo",
-    align: "center",
-    field: "docAlternative",
-    sortable: true,
-  },
-  {
-    name: "hour",
-    label: "Hora",
-    align: "center",
-    field: "hour",
-    sortable: true,
-  },
-  {
-    name: "businessProyectHour",
-    label: "Horas del Proyecto Empresarial",
-    align: "center",
-    field: "businessProyectHour",
-    sortable: true,
-  },
-  {
-    name: "productiveProjectHour",
-    label: "Horas del Proyecto Productivo",
-    align: "center",
-    field: "productiveProjectHour",
-    sortable: true,
-  },
-  {
-    name: "opciones",
-    label: "Opciones",
+    name: "options",
+    label: "OPCIONES",
     align: "center",
     sortable: true,
   },
 ]);
 
 onBeforeMount(() => {
-  getRegisters()
+  getDataForTable();
 })
 
-async function getRegisters() {
-  let response = await getData("Register/listallregister");
-  console.log(response);
-  rows.value = response.register;
+async function getDataForTable() {
+  const getRegisters = await getData("Register/listallregister");
+  const getApprentices = await getData("Apprentice/listallapprentice");
+  const getModalities = await getData("Modality/listallmodality");
+
+  const registersWithApprenticeAndModality = getRegisters.register.map(register => {
+
+    const apprentice = getApprentices.apprentices.find(apprentice => apprentice._id === register.idApprentice[0]);
+
+    console.log('apprentice: ', apprentice);
+    
+    const modality = getModalities.modality.find(modality => modality._id === register.idModality);
+
+    modalitiesOptions.value = getModalities.modality.map((modality) => ({
+      _id: modality._id,
+      name: modality.name,
+    }));
+
+    apprenticeOptions.value = getApprentices.apprentices.map((apprentice) => ({
+      apprenticeId: apprentice._id,
+      apprenticeName: `${apprentice.firstName} ${apprentice.lastName} - ${apprentice.fiche.name}`.trim(),
+    }));
+
+    return {
+      ...register,
+      apprenticeName: apprentice ? `${apprentice.firstName} ${apprentice.lastName}` : 'No Encontrado',
+      ficheNumber: apprentice ? `${apprentice.fiche.number}` : 'No Encontrada',
+      ficheName: apprentice ? `${apprentice.fiche.name}` : 'No Encontrada',
+      modalityName: modality ? modality.name : 'No Encontrada',
+      startDate: formatDate(register.startDate),
+      endDate: formatDate(register.endDate)
+    };
+  });
+
+  rows.value = registersWithApprenticeAndModality;
+};
+
+
+function formatDate(date) {
+  if (!date) return 'No Encontrado';
+  const formattedDate = new Date(date).toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+  return formattedDate;
 }
 
-const drawerOpen = ref(false);
+function nextFormModal() {
+  dialogTitle.value = "CREAR REGISTRO ETAPA PRODUCTIVA APRENDIZ";
+  dialog.value = false;
+  secondModaldialog.value = true;
+}
+
 
 function toggleDrawer() {
   drawerOpen.value = !drawerOpen.value;
@@ -332,20 +428,18 @@ const saveRegister  = async () => {
   }
 };
 
-const toggleEstado = (row) => {
-  // Lógica para cambiar el estado de la fila
-  row.estado = row.estado === 1 ? 0 : 1;
-  console.log("Nuevo estado:", row.estado);
+async function toggleStatus(row) {
+  try {
+    const url =
+      row.status === 0
+        ? `Register/enableregister/${row._id}`
+        : `Register/disableregister/${row._id}`;
+    await putData(url, {});
+    await getRegisters();
+    notifySuccessRequest("Estado cambiado exitosamente");
+  } catch (error) {
+    notifyErrorRequest("Ocurrió un error al cambiar el estado del registro");
+  }
 };
 </script>
 
-<style>
-.layout {
-  padding: 0; 
-}
-
-.table-container {
-  margin-top: 0; /* Quita el margen superior */
-  padding: 0 20px; /* Añade un pequeño padding lateral si es necesario */
-}
-</style>

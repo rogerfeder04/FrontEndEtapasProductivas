@@ -1,10 +1,10 @@
-// /services/apiClient.js
-import apiClient from '@/plugins/axiosRepfora.js'; // Importa tu instancia de Axios si está configurada en /plugins
+// /services/apiRepfora.js
+import apiRepfora from '@/plugins/axiosRepfora.js'; // Importa tu instancia de Axios si está configurada en /plugins
 
 // Función GET
-export async function getData(url) {
+export async function getDataRepfora(url) {
     try {
-        const response = await apiClient.get(url);
+        const response = await apiRepfora.get(url);
         return response.data;  // Devuelve los datos de la respuesta
     } catch (error) {
         console.error('Error en la petición GET:', error);
@@ -13,10 +13,10 @@ export async function getData(url) {
 }
 
 // Función POST
-export async function postData(url, data) {
+export async function postDataRepfora(url, data) {
     try {
-        console.log(data)
-        const response = await apiClient.post(url, data);
+        console.log('this is data from postData:  ', data);
+        const response = await apiRepfora.post(url, data);
         return response.data;  // Devuelve los datos de la respuesta
     } catch (error) {
         console.error('Error en la petición POST:', error);
@@ -25,9 +25,9 @@ export async function postData(url, data) {
 }
 
 // Función PUT
-export async function putData(url, data) {
+export async function putDataRepfora(url, data) {
     try {
-        const response = await apiClient.put(url, data);
+        const response = await apiRepfora.put(url, data);
         return response.data;  // Devuelve los datos de la respuesta
     } catch (error) {
         console.error('Error en la petición PUT:', error);

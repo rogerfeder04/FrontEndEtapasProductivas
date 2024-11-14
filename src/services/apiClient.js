@@ -10,12 +10,12 @@ export async function getData(url) {
         console.error('Error en la petición GET:', error);
         throw error;  // Opcionalmente, puedes manejar el error o lanzarlo
     }
-}
+};
 
 // Función POST
 export async function postData(url, data) {
     try {
-        console.log(data)
+        console.log('this is data from postData:  ', data);
         const response = await apiClient.post(url, data);
         return response.data;  // Devuelve los datos de la respuesta
     } catch (error) {

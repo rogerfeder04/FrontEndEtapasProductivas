@@ -2,7 +2,6 @@
     <q-layout view="lHh Lpr lff" class="layout">
       <q-page-container>
       <Header
-        :title="'REPFORA'"
         :drawerOpen="drawerOpen"
         @toggleDrawer="toggleDrawer"
       ></Header>
@@ -11,10 +10,21 @@
         @update:drawerOpen="toggleDrawer"
       />
 
+    <div class="table-container">
+      
+      <h5>{{ title }}</h5>
+
+      <div style="display:flex; align-items: center !important;">
+        <q-btn  to="/home" dense unelevated round color="primary" icon="arrow_back" text-color="white" />
+        <hr 
+          id="hr" 
+          color="primary"
+        >
+      </div>
+
       <CustomButton label="CREAR MODALIDAD" :onClickFunction="openDialog">
       </CustomButton>
 
-    <div class="table-container">
       <Table
         :rows="rows"
         :columns="columns"
@@ -24,7 +34,7 @@
       ></Table>
     </div>
 
-    <CustomModal
+    <FormModal
         :modelValue="dialog"
         :title="dialogTitle"
         :onSave="saveAssignment"
@@ -73,8 +83,9 @@
             type="text"
           />
         </template>
-      </CustomModal>
+      </FormModal>
   </q-page-container>
+  <Footer></Footer>
 </q-layout>
 </template>
 
@@ -83,10 +94,11 @@ import { ref, onBeforeMount } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
-import Table from "@/components/tables/Table.vue";
+import Footer from "@/components/layouts/Footer.vue"
+import Table from "@/components/tables/TableWithButtons.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
-import CustomModal from "../components/modals/CustomModal.vue";
-import InputLog from "@/components/inputs/Inputs.vue";
+import FormModal from "@/components/modals/FormModal.vue";
+import InputLog from "@/components/inputs/CustomInput.vue";
 import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
 
 import { getData, postData } from "@/services/apiClient.js";

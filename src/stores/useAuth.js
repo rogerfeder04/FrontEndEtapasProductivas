@@ -4,6 +4,7 @@ import { ref } from "vue";
 export const useAuthStore = defineStore("auth", () => {
     const token = ref("");
     const rol = ref("");
+    
 
     // Función para establecer el token
     function setToken(newToken) {
@@ -12,10 +13,15 @@ export const useAuthStore = defineStore("auth", () => {
         } else {
             console.log("No está llegando el token: ", newToken);
         }
-    }
+    };
 
     function getToken() {
         return token.value; 
+    };
+
+    function removeToken() {
+        token.value = "";
+        localStorage.removeItem("auth");
     }
 
     // Función para establecer el rol
@@ -25,17 +31,26 @@ export const useAuthStore = defineStore("auth", () => {
         } else {
             console.log("No está llegando el rol: ", newRol);
         }
-    }
+    };
 
     function getRol() {
         return rol.value; 
+    };
+
+    function removeRol() {
+        rol.value = "";
+        localStorage.removeItem("auth");
     }
+
+
 
     return {
         setToken,
         getToken,
+        removeToken,
         setRol,
         getRol,
+        removeRol,
         token,
         rol
     };

@@ -1,8 +1,8 @@
 <template>
-  <q-footer elevated class="bg-grey-6 text-white">
+  <q-footer  class="bg-grey-5 text-white" id="footerStyle">
     <q-toolbar>
       <q-toolbar-title>
-          <div id="footerText">REPFORA - Sena 2024 © Todos los derechos reservados</div>
+          <div id="footerText">ETAPAS PRODUCTIVAS - Sena 2024 © Todos los derechos reservados</div>
       </q-toolbar-title>
     </q-toolbar>
   </q-footer>
@@ -10,10 +10,14 @@
   
 <style>
 #footerText {
-  font-size: 17px;
+  font-size: 13px;
   text-align: center;
   color: black;
   font-weight: bold;
+}
+
+#footerStyle{
+  position: fixed;
 }
 </style>
   

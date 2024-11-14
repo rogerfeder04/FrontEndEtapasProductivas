@@ -12,42 +12,47 @@
 
       <br>
 
-      <div class="table-container">
-        <h5>{{ title }}</h5>
+    <div class="table-container">
+      <h5>{{ title }}</h5>
 
-        <div style="display:flex; align-items: center !important;">
+      <div style="display:flex; align-items: center !important;">
         <q-btn  to="/home" dense unelevated round color="primary" icon="arrow_back" text-color="white" />
         <hr 
           id="hr" 
           color="primary"
         >
       </div>
-  
+
       <Table
         :rows="rows"
         :columns="columns"
+        :onClickEdit="openDialog"
+        :onClickActivate="toggleEstado"
       ></Table>
     </div>
   </q-page-container>
   <Footer></Footer>
-  </q-layout>
-  </template>
-  
+</q-layout>
+</template>
+
 <script setup>
 import { ref, onBeforeMount } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
-import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
+import Footer from "@/components/layouts/Footer.vue"
+import { notifyErrorRequest } from "@/composables/notify/Notify.vue";
+
 import { getData } from "@/services/apiClient.js";
-  
-const title = ref("BITÁCORAS");
+
+const title = ref("SEGUIMIENTOS");
+const dialog = ref(false);
 const drawerOpen = ref(true);
 
-  const rows = ref([]);
-  const columns = ref([
-  {
+const rows = ref([]);
+const columns = ref([
+{
     name: "numberList",
     required: true,
     label: "N°",
@@ -62,30 +67,21 @@ const drawerOpen = ref(true);
     sortable: true,
   },
   {
-    name: "instructor",
+    name: "binnacleNumber",
     required: true,
-    label: "N° BITÁCORA",
+    label: "N° SEGUIMIENTO",
     align: "center",
-    field: row => row.instructor.idInstructor,
+    field: "number",
     sortable: true,
   },
   {
-    name: "instructor",
-    required: true,
-    label: "INSTRUCTOR",
-    align: "center",
-    field: row => row.instructor.idInstructor,
-    sortable: true,
-  },
-  {
-    name: "document",
-    required: true,
+    name: "status",
     label: "ESTADO",
     align: "center",
-    field: "document",
+    field: "status",
     sortable: true,
   },
-  {
+    {
     name: "observation",
     required: true,
     label: "OBSERVACIONES",
@@ -93,21 +89,37 @@ const drawerOpen = ref(true);
     field: row => row.observation.observation,
     sortable: true,
   },
-  ]);
-  
-  onBeforeMount(() => {
-    getBinnacles()
-  })
-  
-  async function getBinnacles() {
-  let response = await getData("Binnacle/listallbinnacles");
-  console.log('Response from getBinnacles:  ', response);
-  rows.value = response;
-  }
-    
-  function toggleDrawer() {
-  drawerOpen.value = !drawerOpen.value;
-  }
-  </script>
+  {
+    name: "date",
+    align: "center",
+    label: "FECHA",
+    field: "date",
+    sortable: true,
+  },
 
-  
+]);
+
+onBeforeMount(() => {
+    getFollowUps();
+})
+
+async function getFollowUps() {
+  try{
+  await getData("Followup/listallfollowup");
+  rows.value = response.followup;
+} catch (error) {
+  notifyErrorRequest(error.response.data.errors[0].msg);
+  console.log(error);
+}
+}
+
+function toggleDrawer() {
+  drawerOpen.value = !drawerOpen.value;
+}
+
+const openDialog = () => {
+  dialog.value = true;
+};
+
+</script>
+

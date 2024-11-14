@@ -9,8 +9,10 @@
       <q-card-section id="inputsSection">
         <slot name="content"></slot>
         <q-card-actions align="center">
-          <CustomButton label="Cancelar" color="negative" @click="closeModal" />
-          <CustomButton label="Guardar" color="positive" @click="handleSave" />
+          <CustomButton text-color="grey" style="width: 40%;" label="Cancelar" color="white" @click="closeModal" :icon="['fa', 'circle-xmark']" />
+          <CustomButton v-if="title != 'SELECCIONE MODALIDAD'" label="Guardar" color="primary" style="width: 40%;" @click="handleSave" :icon="['fa', 'floppy-disk']"/>
+          <CustomButton v-if="title === 'SELECCIONE MODALIDAD'" label="Continuar" color="primary" style="width: 40%;" @click="next" :icon="['fa', 'circle-right']"/>
+
         </q-card-actions>
       </q-card-section>
     </q-card>
@@ -19,7 +21,7 @@
 
 <script setup>
 import { computed, defineEmits } from 'vue';
-import CustomButton from '../buttons/CustomButton.vue';
+import CustomButton from '@/components/buttons/CustomButton.vue';
 
 const emit = defineEmits();
 
@@ -36,9 +38,12 @@ const props = defineProps({
   title: {
     type: String,
     required: false,
-    default: 'Dialog',
   },
   onSave: {
+    type: Function,
+    required: false,
+  },
+  next: {
     type: Function,
     required: false,
   }
@@ -71,7 +76,7 @@ const handleSave = () => {
   /* top, right, bottom, left */
   padding: 10px 15px 5px 15px !important;
   text-align: center !important;
-
+  width: 400px !important;
 }
 
 ::-webkit-scrollbar {
@@ -90,7 +95,6 @@ const handleSave = () => {
   border: 3px solid #f1f1f1;
 }
 
-
 .title {
   font-size: 28px;
   align-self: center;
@@ -100,20 +104,7 @@ const handleSave = () => {
   z-index: 1;
 }
 
-.text-align-center{
-  text-align: center !important;
+.q-card__actions{
+  gap: 10%;
 }
-
-.inputsSection {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 0px !important;
-}
-
-@media (max-width: 600px) {
-  .inputsSection {
-    grid-template-columns: 1fr !important; 
-  }
-}
-
 </style>

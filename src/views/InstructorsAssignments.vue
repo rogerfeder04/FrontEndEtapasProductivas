@@ -38,12 +38,16 @@ import { ref, onBeforeMount } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
-import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
-import { getData } from "@/services/apiClient.js";
+import Footer from "@/components/layouts/Footer.vue";
+import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
+import { getData, postData } from "@/services/apiClient.js";
   
-const title = ref("BITÁCORAS");
+const title = ref("MIS ASIGNACIONES");
+const dialog = ref(false);
 const drawerOpen = ref(true);
+const dialogTitle = ref("SELECCIONE MODALIDAD");
+
 
   const rows = ref([]);
   const columns = ref([
@@ -57,57 +61,84 @@ const drawerOpen = ref(true);
   {
     name: "assignment",
     align: "center",
-    label: "ETAPA PRODUCTIVA ASIGNADA",
+    label: "NOMBRE APRENDIZ",
     field: "assignment",
     sortable: true,
   },
   {
-    name: "instructor",
+    name: "binnacleNumber",
     required: true,
-    label: "N° BITÁCORA",
+    label: "N° DOCUMENTO",
     align: "center",
-    field: row => row.instructor.idInstructor,
+    field: "number",
     sortable: true,
   },
   {
-    name: "instructor",
+    name: "number",
     required: true,
-    label: "INSTRUCTOR",
+    label: "MODALIDAD",
     align: "center",
-    field: row => row.instructor.idInstructor,
-    sortable: true,
-  },
-  {
-    name: "document",
-    required: true,
-    label: "ESTADO",
-    align: "center",
-    field: "document",
+    field: "number",
     sortable: true,
   },
   {
     name: "observation",
     required: true,
-    label: "OBSERVACIONES",
+    label: "TIPO INSTRUCTOR",
     align: "center",
     field: row => row.observation.observation,
+    sortable: true,
+  },
+  {
+    name: "document",
+    required: true,
+    label: "BITÁCORAS",
+    align: "center",
+    field: "document",
+    sortable: true,
+  },
+  {
+    name: "opciones",
+    label: "SEGUIMIENTOS",
+    align: "center",
     sortable: true,
   },
   ]);
   
   onBeforeMount(() => {
-    getBinnacles()
+    getInstructorId();
   })
-  
-  async function getBinnacles() {
-  let response = await getData("Binnacle/listallbinnacles");
-  console.log('Response from getBinnacles:  ', response);
-  rows.value = response;
-  }
-    
+
+  async function getInstructorId() {
+    try {
+      const response = await getData(`Repfora/instructors`);
+      const selectInstructor = response.find(
+        instructor => instructor.email === localStorage.getItem("userEmail")
+      );
+
+      if (selectInstructor) {
+        idInstructor.value = selectInstructor._id;
+      }
+      getAssignments();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAssignments = async () => {
+    try{
+        const response = await getData('Assignment/listallassignment')
+        console.log('response from getAssignments:  ', response);
+        
+    } catch (error){
+        console.error(error);
+    }
+  };
+
   function toggleDrawer() {
   drawerOpen.value = !drawerOpen.value;
-  }
+  };
+  
   </script>
 
   

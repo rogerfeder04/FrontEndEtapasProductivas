@@ -1,209 +1,200 @@
 <template>
   <q-layout view="lHh Lpr lff" class="layout">
     <q-page-container>
-    <Header
-      :title="'REPFORA'"
-      :drawerOpen="drawerOpen"
-      @toggleDrawer="toggleDrawer"
-    ></Header>
-    <Sidebar 
-      :drawerOpen="drawerOpen" 
-      @update:drawerOpen="toggleDrawer"
-    />
+      <Header :drawerOpen="drawerOpen" @toggleDrawer="toggleDrawer" />
+      <Sidebar :drawerOpen="drawerOpen" @update:drawerOpen="toggleDrawer" />
 
-    <CustomButton 
-        label="CREAR FICHA"
-        :onClickFunction="openDialog"
-      >
-      </CustomButton>
+      <br />
 
-  <div class="table-container">
-    <Table
-      :rows="rows"
-      :columns="columns"
-      :title="title"
-      :onClickEdit="openDialog"
-      :onClickActivate="toggleEstado"
-    ></Table>
-  </div>
+      <div class="table-container">
+        <h5>{{ title }}</h5>
+        <div style="display:flex; align-items: center !important;">
+        <q-btn  to="/home" dense unelevated round color="primary" icon="arrow_back" text-color="white" />
+        <hr 
+          id="hr" 
+          color="primary"
+        >
+      </div>
+        <Table
+          :rows="rows"
+          :columns="columns"
+          :onClickToggleStatus="toggleEstado"
+          :onClickOpenModal="openDialogWithRow"
+        ></Table>
+      </div>
 
-  <CustomModal
-        :modelValue="dialog"
-        :title="dialogTitle"
-        :onSave="saveFiche"
-        @update:modelValue="dialog = $event"
-      >
-        <template #content>
-          <div class="input-grid">
-          <InputLog
-            id="register"
-            filled
-            label="Registro"
-            v-model="register"
-            required
-            errorMessage="Registro requerido"
-            icon="file"
-            type="text"
-          />
-
-          <InputLog
-            id="followUpInstructor"
-            filled
-            label="Instructor de Seguimiento"
-            v-model="followUpInstructor"
-            required
-            errorMessage="Instructor de Seguimiento requerido"
-            icon="chalkboard-user"
-            type="text"
-          />
-          <InputLog
-            id="technicalInstructor"
-            filled
-            label="Instructor Técnico"
-            v-model="technicalInstructor"
-            required
-            errorMessage="Instructor Técnico requerido"
-            icon="street-view"
-            type="text"
-          />
-          <InputLog
-            id="projectInstructor"
-            filled
-            label="Instructor de Proyecto"
-            v-model="projectInstructor"
-            required
-            errorMessage="Instructor de Proyecto requerido"
-            icon="person-chalkboard"
-            type="text"
-          />
-          <InputLog
-            id="certificationDoc"
-            filled
-            label="Documento de certificación"
-            v-model="certificationDoc"
-            required
-            errorMessage="Documento de certificación requerido"
-            icon="file-invoice"
-            type="text"
-          />
-          <InputLog
-            id="judymentPhoto"
-            filled
-            label="Foto del Juicio"
-            v-model="judymentPhoto"
-            required
-            errorMessage="Foto del Juicio requerido"
-            icon="image"
-            type="text"
-          />
-        </div>
-        </template>
-      </CustomModal>
-</q-page-container>
-</q-layout>
+      <TableModal v-model:dialog="dialog" :row="selectedRow" >
+        <template v-slot>
+          <div class="table-container">
+        <h5>{{ title2 }}</h5>
+        <hr id="hr" color="primary" />
+          <Table
+          :rows="rows2"
+          :columns="columns2"
+          :onClickView="openDialogWithRow"
+        ></Table>
+      </div>
+  </template>
+      </TableModal>
+    </q-page-container>
+    <Footer></Footer>
+  </q-layout>
 </template>
 
 <script setup>
 import { ref, onBeforeMount } from "vue";
-
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
-import Table from "@/components/tables/Table.vue";
-import CustomButton from "@/components/buttons/CustomButton.vue";
-import CustomModal from "../components/modals/CustomModal.vue";
-import InputLog from "@/components/inputs/Inputs.vue";
-import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
-import { getData, postData } from "@/services/apiClient.js";
-
+import Footer from "@/components/layouts/Footer.vue"
+import Table from "@/components/tables/TableWithButtons.vue";
+import TableModal from "@/components/modals/TableModal.vue";
+import { getData } from "@/services/apiClient.js";
+import TableWithoutButtons from "@/components/tables/TableWithoutButtons.vue";
 
 const title = ref("FICHAS");
+const title2 = ref("INFORME DE APRENDICES POR FICHAS");
+
+const drawerOpen = ref(true);
 const dialog = ref(false);
-const dialogTitle = ref("CREAR FICHA");
-
-//v-models de los inputs
-const register = ref("");
-const followUpInstructor = ref("");
-const technicalInstructor = ref("");
-const projectInstructor = ref("");
-const certificationDoc = ref("");
-const judymentPhoto = ref("");
-
-const ficheData = {
-  register: register.value,
-  followUpInstructor: followUpInstructor.value,
-  technicalInstructor: technicalInstructor.value,
-  projectInstructor: projectInstructor.value,
-  certificationDoc: certificationDoc.value,
-  judymentPhoto: judymentPhoto.value,
-};
+const selectedRow = ref(null);
 
 const rows = ref([]);
 const columns = ref([
-{
-  name: "program",
-  align: "center",
-  label: "Ficha",
-  field: row => row.program.name,
-  sortable: true,
-},
-{
-  name: "number",
-  required: true,
-  label: "Número de Ficha",
-  align: "center",
-  field: "number",
-  sortable: true,
-},
-{
-  name: "status",
-  label: "Estado",
-  align: "center",
-  field: "status",
-  sortable: true,
-},
-{
-  name: "opciones",
-  label: "Opciones",
-  align: "center",
-  sortable: true,
-},
+  {
+    name: "numberList",
+    required: true,
+    label: "N°",
+    align: "center",
+    field: "numberList",
+  },
+  {
+    name: "program",
+    align: "center",
+    label: "NOMBRE FICHA",
+    field: (row) => row.program.name,
+    sortable: true,
+  },
+  {
+    name: "number",
+    required: true,
+    label: "COD. FICHA",
+    align: "center",
+    field: "number",
+    sortable: true,
+  },
+  {
+    name: "status",
+    label: "ESTADO",
+    align: "center",
+    field: "status",
+    sortable: true,
+  },
+  {
+    name: "eyeButton",
+    label: "VER APRENDICES",
+    align: "center",
+    sortable: true,
+  },
+]);
+
+const rows2 = ref([]);
+const columns2 = ref([
+  {
+    name: "numberList",
+    required: true,
+    label: "N°",
+    align: "center",
+    field: "numberList",
+  },
+  {
+    name: "name",
+    required: true,
+    label: "NOMBRE APRENDIZ",
+    align: "center",
+    field: (row) => `${row.firstName || ""} ${row.lastName || ""}`.trim(),
+    sortable: true,
+  },
+  {
+    name: "tpDocument",
+    align: "center",
+    label: "TIPO DOCUMENTO",
+    field: "tpDocument",
+    sortable: true,
+  },
+  {
+    name: "numDocument",
+    align: "center",
+    label: "N° DOCUMENTO",
+    field: "numDocument",
+  },
+  {
+    name: "personalEmail",
+    align: "center",
+    label: "EMAIL PERSONAL",
+    field: "personalEmail",
+  },
+  {
+    name: "institutionalEmail",
+    align: "center",
+    label: "EMAIL INSTITUCIONAL",
+    field: "institutionalEmail",
+  },
+  {
+    name: "phone",
+    align: "center",
+    label: "TEL.",
+    field: "phone",
+  },
+  {
+    name: "fiche",
+    label: "FICHA",
+    align: "center",
+    field: (row) => row.fiche.name,
+  },
+  {
+    name: "ficheCode",
+    label: "COD. FICHA",
+    align: "center",
+    field: (row) => row.fiche.number,
+    sortable: true,
+  },
+  {
+    name: "status",
+    label: "ESTADO",
+    align: "center",
+    field: "status",
+    sortable: true,
+  },
 ]);
 
 onBeforeMount(() => {
-  getFiches()
-})
+  getFiches();
+});
 
 async function getFiches() {
-let response = await getData("Repfora/fiches");
-console.log(response);
-rows.value = response;
+  let response = await getData("Repfora/fiches");
+  rows.value = response;
 }
 
-const drawerOpen = ref(false);
+async function getApprenticesByFiche(ficheId) {
+  let response = await getData(`Apprentice/listapprenticebyfiche/${ficheId}`);
+  console.log("response from getApprenticesByFiche: ", response);
+  rows2.value = response.apprentices;
+}
+
+const openDialogWithRow = (row) => {
+  selectedRow.value = row;
+  dialog.value = true;
+  console.log('row: ', row);
+  
+  getApprenticesByFiche(row._id); 
+};
 
 function toggleDrawer() {
-drawerOpen.value = !drawerOpen.value;
+  drawerOpen.value = !drawerOpen.value;
 }
 
-const openDialog = () => {
-  dialog.value = true;
-};
-
-const saveFiche = async () => {
-  try {
-    let response = await postData("Repfora/addFiche", ficheData);
-
-    // Si la respuesta es exitosa, actualizamos la tabla y cerramos el modal
-    rows.value = response;
-    dialog.value = false;
-    notifySuccessRequest("Asignación guardada exitosamente");
-  } catch (error) {
-    notifyErrorRequest("Ocurrió un error al guardar la asignación");
-  }
-};
-
-const toggleEstado = (row) => {
-row.estado = row.estado === 1 ? 0 : 1;
-console.log("Nuevo estado:", row.estado);
-};
+function toggleEstado(row) {
+  row.estado = row.estado === 1 ? 0 : 1;
+}
 </script>

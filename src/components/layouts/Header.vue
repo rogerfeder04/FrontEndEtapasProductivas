@@ -8,17 +8,21 @@
         </q-avatar> -->
         <span>{{ title }}</span>
       </q-toolbar-title>
+      <q-btn dense flat round icon="logout" @click="logout()" />
     </q-toolbar>
   </q-header>
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const props = defineProps({
   title: {
     type: String,
-    default: "REPFORA"
+    default: "ETAPAS PRÁCTICAS"
   },
   drawerOpen: {
     type: Boolean,
@@ -30,6 +34,12 @@ const emit = defineEmits(['toggleDrawer']);
 
 function toggleDrawer() {
   emit('toggleDrawer');
+}
+
+const logout = () => {
+  router.push('/');
+  
+
 }
 </script>
 

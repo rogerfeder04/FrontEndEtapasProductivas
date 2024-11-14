@@ -1,13 +1,8 @@
 <template>
-  <q-btn
-   class="navBarButton" 
-   @click="onClickFunction"
-   flat
-   >
-      <font-awesome-icon :icon="icon" style="font-size: 24px; color: white;"/>
+  <q-btn class="navBarButton" @click="onClickFunction" flat>
+    <font-awesome-icon :icon="icon" style="font-size: 24px; color: white" />
 
-    <span class="navBarButtonLabel"
-    >{{ label }}</span>
+    <span class="navBarButtonLabel">{{ label }}</span>
   </q-btn>
 </template>
 
@@ -25,19 +20,20 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-
 });
 </script>
 
 <style scoped>
 .navBarButton {
   color: white;
+  white-space: nowrap !important;
   background-color: var(--q-primary);
   border-radius: 8px;
   font-weight: bold;
   transition: border 0.3s, color 0.3s;
   text-decoration: none;
   font-size: 15px;
+  align-items: start;
 }
 
 .navBarButton:hover {
@@ -45,11 +41,9 @@ const props = defineProps({
   transition: border 0.3s;
 }
 
-.navBarButtonIcon {
-  margin-right: 8px;
-}
-
 .navBarButtonLabel {
   margin-left: 8px;
 }
+
+
 </style>

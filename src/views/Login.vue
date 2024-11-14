@@ -15,7 +15,7 @@
 
     <h1 
     class="text-h5 q-mt-sm q-mb-xs" align="center"><b>LOG IN</b></h1>
-
+    <form @submit.prevent="onSubmit">
     <q-card-section align="center">
       <q-select
         class="selectStyles"
@@ -38,7 +38,7 @@
       />  
 
       <InputLog
-        v-if="role === 'ADMIN' || role === 'Instructor'"
+        v-if="role === 'ADMIN' || role === 'INSTRUCTOR'"
         id="password"
         placeholder="Ingresa tu contraseña"
         v-model="password"
@@ -48,7 +48,7 @@
         />  
 
         <InputLog
-        v-if="role === 'Apprentice'"
+        v-if="role === 'CONSULTOR'"
         id="document"
         placeholder="Ingresa tu documento"
         v-model="document"
@@ -61,17 +61,20 @@
       label="INICIAR SESIÓN" 
       :onClickFunction="onSubmit"
       color="primary"
+      :icon="['fa', 'right-to-bracket']"
+      type="submit"
     />
 
-    <div v-if="role === 'ADMIN' || role === 'Instructor'">
+    <div v-if="role === 'ADMIN' || role === 'INSTRUCTOR'">
           <router-link
             to="/recoverpassword"
             class="forgotPassword"
             id="recuperacion"
-            ><b>Restablecer Contraseña</b>
+            ><b>Olvidé mi contraseña</b>
           </router-link>
     </div>
     </q-card-section>
+  </form>
   </q-card>
 </div>
 </q-page-container>
@@ -83,27 +86,25 @@
   
 <script setup>
 import Footer from "@/components/layouts/Footer.vue"
-import InputLog from "@/components/inputs/Inputs.vue";
+import InputLog from "@/components/inputs/CustomInput.vue";
 import customButton from "@/components/buttons/CustomButton.vue";
 
 import { ref, watch } from "vue";
-import { postData } from "@/services/apiClient.js";
-import { getData } from "@/services/apiClient.js";
+import { postData, getData } from "@/services/apiClient.js";
+import { postDataRepfora } from "@/services/apiRepfora.js";
 import { notifyErrorRequest, notifySuccessRequest, notifyWarningRequest } from "@/composables/notify/Notify.vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/useAuth.js";
+import { SessionStorage } from "quasar";
 
 const route = useRouter();
 const authStore = useAuthStore();
-const role = ref('Apprentice')
-const roles = ref(['Instructor', 'ADMIN', 'Apprentice'])
+const role = ref('CONSULTOR')
+const roles = ref(['INSTRUCTOR', 'ADMIN', 'CONSULTOR'])
 const email = ref("");
 const password = ref("");
 const document = ref("")
-
-
-// const requiredRule = (value) => !!value || "Campo requerido";
-// const emailRule = (value) => /.+@.+\..+/.test(value) || "Correo inválido";
+const userName = ref("");
 
 const userData = ref({
   "role": role.value.trim(),
@@ -119,36 +120,61 @@ watch([email, password, role], () => {
   };
 });
 
+const apprenticeData = ref({
+  "role": role.value.trim(),
+  "email": email.value.trim(),
+  "document": document.value.trim()
+});
+
+
+
 const updateRole = (newRole) => {
   role.value = newRole;
   userData.value.role = newRole;
 };
 
 const onSubmit = async () => {
+    try {
+        if (role.value === "ADMIN") {
+            let response = await postData("/Repfora/Login", userData.value)
+            authStore.setToken(response.token);
+            authStore.setRol(role.value);
+            //setUserName(userName.value);
+            console.log(response.token)
+            localStorage.setItem('token', response.token);
+            localStorage.setItem("userEmail", userData.value.email);
+            route.push("/home")
+            notifySuccessRequest("Inicio de sesión exitoso")
+        }
+        else if (role.value === "INSTRUCTOR") {
+          let response = await postDataRepfora("/instructors/login", userData.value)
+          authStore.setToken(response.token);
+          authStore.setRol(role.value);
+          localStorage.setItem("userEmail", userData.value.email);
+          //setUserName(userName.value)
+            route.push("/home")
+            notifySuccessRequest("Inicio de sesión exitoso")
+        }
+        else {
+          let response = await postData("/Apprentice/loginApprentice", userData.value)
+          authStore.setToken(response.token);
+          authStore.setRol(role.value);
+            route.push("/binnacles")
+            notifySuccessRequest("Inicio de sesión exitoso")
+        }
+    } catch (error) {
+        notifyErrorRequest(error.response.data.msg);
+        console.error("Error Inicio de sesión error", error);
+    }
+};
+
+const getUserName = async () => {
   try{
-    if (role.value === "ADMIN" || role.value === "Instructor") {
-    let response = await postData("Repfora/Login", userData.value)
-    console.log(response.token)
-    localStorage.setItem('token', response.token);
-
-      // Configura el token en la store
-      authStore.setToken(response.token); 
-      authStore.setRol(role.value);      
-    route.push("/home")
-    notifySuccessRequest("Inicio de sesión exitoso")
-  }else if (role.value === "Apprentice") {
-  let response = await getData("/Apprentice/listallapprentice") 
-
-      authStore.setRol(role.value);
-
- const apprentice = response.apprentices.find(apprentice => apprentice.email === email.value)
- route.push("/binnacles")
-}
-} catch (error) {
-  notifyErrorRequest("Error en el inicio de sesión");
-  console.error("Error Inicio de sesión error", error);
-}
-}
+    const response = await getData("User/getusername");
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 </script>
   

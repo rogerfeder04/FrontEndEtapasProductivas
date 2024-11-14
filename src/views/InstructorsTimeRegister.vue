@@ -1,7 +1,7 @@
 <template>
     <q-layout view="lHh Lpr lff" class="layout">
-      <q-page-container>
-      <Header
+        <q-page-container>
+            <Header
         :drawerOpen="drawerOpen"
         @toggleDrawer="toggleDrawer"
       ></Header>
@@ -9,7 +9,7 @@
         :drawerOpen="drawerOpen" 
         @update:drawerOpen="toggleDrawer"
       />
-
+      
       <br>
 
       <div class="table-container">
@@ -22,17 +22,26 @@
           color="primary"
         >
       </div>
+
+      <CustomButton 
+        label="CREAR BITÁCORA"
+        :onClickFunction="openDialog"
+        :icon="['fa', 'circle-plus']"
+      >
+      </CustomButton>
   
       <Table
         :rows="rows"
         :columns="columns"
+        :onClickEdit="openDialog"
+        :onClickActivate="toggleEstado"
       ></Table>
     </div>
-  </q-page-container>
-  <Footer></Footer>
-  </q-layout>
-  </template>
-  
+        </q-page-container>
+        <Footer></Footer>
+    </q-layout>
+</template>
+
 <script setup>
 import { ref, onBeforeMount } from "vue";
 
@@ -40,12 +49,15 @@ import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
 import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
+
+import { notifyErrorRequest } from "@/composables/notify/Notify.vue";
+
 import { getData } from "@/services/apiClient.js";
-  
-const title = ref("BITÁCORAS");
+
+const title = ref("Informe Horas Instructores EP");
 const drawerOpen = ref(true);
 
-  const rows = ref([]);
+const rows = ref([]);
   const columns = ref([
   {
     name: "numberList",
@@ -57,57 +69,50 @@ const drawerOpen = ref(true);
   {
     name: "assignment",
     align: "center",
-    label: "ETAPA PRODUCTIVA ASIGNADA",
+    label: "NOMBRE INSTRUCTOR",
     field: "assignment",
     sortable: true,
   },
   {
-    name: "instructor",
+    name: "binnacleNumber",
     required: true,
-    label: "N° BITÁCORA",
+    label: "ETAPA PRODUCTIVA",
     align: "center",
-    field: row => row.instructor.idInstructor,
+    field: "number",
     sortable: true,
   },
   {
-    name: "instructor",
+    name: "number",
     required: true,
-    label: "INSTRUCTOR",
+    label: "ROL INSTRUCTOR",
     align: "center",
-    field: row => row.instructor.idInstructor,
-    sortable: true,
-  },
-  {
-    name: "document",
-    required: true,
-    label: "ESTADO",
-    align: "center",
-    field: "document",
+    field: "number",
     sortable: true,
   },
   {
     name: "observation",
     required: true,
-    label: "OBSERVACIONES",
+    label: "HORAS EJECUTADAS",
     align: "center",
     field: row => row.observation.observation,
     sortable: true,
   },
+  {
+    name: "document",
+    required: true,
+    label: "HORAS PENDIENTES",
+    align: "center",
+    field: "document",
+    sortable: true,
+  },
+  {
+    name: "opciones",
+    label: "HORAS TOTALES",
+    align: "center",
+    sortable: true,
+  },
   ]);
-  
-  onBeforeMount(() => {
-    getBinnacles()
-  })
-  
-  async function getBinnacles() {
-  let response = await getData("Binnacle/listallbinnacles");
-  console.log('Response from getBinnacles:  ', response);
-  rows.value = response;
-  }
-    
-  function toggleDrawer() {
-  drawerOpen.value = !drawerOpen.value;
-  }
-  </script>
 
-  
+  onBeforeMount(() => {
+  })
+</script>

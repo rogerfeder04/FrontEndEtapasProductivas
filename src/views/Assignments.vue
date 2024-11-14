@@ -2,97 +2,112 @@
   <q-layout view="lHh Lpr lff" class="layout">
     <q-page-container>
       <Header
-        :title="'REPFORA'"
         :drawerOpen="drawerOpen"
         @toggleDrawer="toggleDrawer"
       ></Header>
-      <Sidebar :drawerOpen="drawerOpen" @update:drawerOpen="toggleDrawer" />
+      <Sidebar
+       :drawerOpen="drawerOpen"
+        @update:drawerOpen="toggleDrawer" 
+      />
 
-      <CustomButton label="CREAR ASIGNACIÓN" :onClickFunction="openDialog">
-      </CustomButton>
+      <br>       
 
       <div class="table-container">
+        <h5>{{ title }}</h5>
+
+        <div style="display:flex; align-items: center !important;">
+        <q-btn  to="/home" dense unelevated round color="primary" icon="arrow_back" text-color="white" />
+        <hr 
+          id="hr" 
+          color="primary"
+        >
+      </div>
+
+          <CustomButton 
+          label="CREAR ASIGNACIÓN" 
+          :onClickFunction="openDialog"
+          :icon="['fa', 'circle-plus']"
+          >
+        </CustomButton>
+
         <Table
           :rows="rows"
           :columns="columns"
-          :title="title"
-          :onClickEdit="openDialog"
-          :onClickActivate="toggleEstado"
+          :onClickEdit="editAssignmentModal"
+          :onClickToggleStatus="toggleStatus"
         ></Table>
       </div>
 
-      <CustomModal
+      <FormModal
         :modelValue="dialog"
         :title="dialogTitle"
         :onSave="saveAssignment"
         @update:modelValue="dialog = $event"
       >
         <template #content>
-          <div class="input-grid">
-          <InputLog
-            id="register"
-            filled
-            label="Registro"
-            v-model="register"
-            required
-            errorMessage="Registro requerido"
-            icon="file"
-            type="text"
-          />
+          <div>
+            <CustomSelect
+              map-options
+              label="Aprendiz"
+              v-model="apprentice"
+              @filter="filterApprentice"
+              required
+              :options="apprenticeOptions"
+              optionLabel="apprenticeName"
+              optionValue="apprenticeId"
+              errorMessage="Aprendiz requerido"
+              icon="users-line"
+              type="text"
+            >
+            </CustomSelect>
 
-          <InputLog
-            id="followUpInstructor"
-            filled
-            label="Instructor de Seguimiento"
-            v-model="followUpInstructor"
-            required
-            errorMessage="Instructor de Seguimiento requerido"
-            icon="chalkboard-user"
-            type="text"
-          />
-          <InputLog
-            id="technicalInstructor"
-            filled
-            label="Instructor Técnico"
-            v-model="technicalInstructor"
-            required
-            errorMessage="Instructor Técnico requerido"
-            icon="street-view"
-            type="text"
-          />
-          <InputLog
-            id="projectInstructor"
-            filled
-            label="Instructor de Proyecto"
-            v-model="projectInstructor"
-            required
-            errorMessage="Instructor de Proyecto requerido"
-            icon="person-chalkboard"
-            type="text"
-          />
-          <InputLog
-            id="certificationDoc"
-            filled
-            label="Documento de certificación"
-            v-model="certificationDoc"
-            required
-            errorMessage="Documento de certificación requerido"
-            icon="file-invoice"
-            type="text"
-          />
-          <InputLog
-            id="judymentPhoto"
-            filled
-            label="Foto del Juicio"
-            v-model="judymentPhoto"
-            required
-            errorMessage="Foto del Juicio requerido"
-            icon="image"
-            type="text"
-          />
-        </div>
+
+            <CustomSelect
+              filled
+              label="Instructor de Seguimiento"
+              v-model="followupInstructor"
+              @filter="filterInstructor"
+              required
+              :options="instructorOptions"
+              optionLabel="instructorNameForSelect"
+              optionValue="instructorId"
+              errorMessage="Instructor de seguimiento requerido"
+              icon="chalkboard-user"
+              type="text"
+            ></CustomSelect>
+
+
+            <CustomSelect
+              filled
+              label="Instructor Técnico"
+              v-model="technicalInstructor"
+              @filter="filterInstructor"
+              required
+              :options="instructorOptions"
+              optionLabel="instructorName"
+              optionValue="instructorId"
+              errorMessage="Instructor técnico requerido"
+              icon="shapes"
+            ></CustomSelect>
+
+            <CustomSelect
+              id="modality"
+              filled
+              label="Instructor de Proyecto"
+              v-model="projectInstructor"
+              @filter="filterInstructor"
+              required
+              :options="instructorOptions"
+              optionLabel="instructorName"
+              optionValue="instructorId"
+              errorMessage="Instructor de proyecto requerido"
+              icon="shapes"
+            ></CustomSelect>
+          </div>
         </template>
-      </CustomModal>
+      </FormModal>
+
+      <Footer></Footer>
     </q-page-container>
   </q-layout>
 </template>
@@ -102,132 +117,291 @@ import { ref, onBeforeMount } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
-import Table from "@/components/tables/Table.vue";
+import Footer from "@/components/layouts/Footer.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
-import CustomModal from "../components/modals/CustomModal.vue";
-import InputLog from "@/components/inputs/Inputs.vue";
+import FormModal from "@/components/modals/FormModal.vue";
+import Input from "@/components/inputs/CustomInput.vue";
+import CustomSelect from "@/components/inputs/CustomSelect.vue";
+import Table from "@/components/tables/TableWithButtons.vue";
 import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
 
-import { getData, postData } from "@/services/apiClient.js";
+import { getData } from "@/services/apiClient.js";
 
 const title = ref("ASIGNACIONES");
 const dialog = ref(false);
 const dialogTitle = ref("CREAR ASIGNACIÓN");
+const drawerOpen = ref(true);
 
 //v-models de los inputs
-const register = ref("");
-const followUpInstructor = ref("");
-const technicalInstructor = ref("");
+const apprentice = ref("");
 const projectInstructor = ref("");
-const certificationDoc = ref("");
-const judymentPhoto = ref("");
+const followupInstructor = ref("");
+const technicalInstructor = ref("");
 
-const assignmentData = {
-  register: register.value,
-  followUpInstructor: followUpInstructor.value,
-  technicalInstructor: technicalInstructor.value,
-  projectInstructor: projectInstructor.value,
-  certificationDoc: certificationDoc.value,
-  judymentPhoto: judymentPhoto.value,
-};
+const apprenticeOptions = ref([]);
+const instructorOptions = ref([]);
 
-// Configuración de la tabla
 const rows = ref([]);
 const columns = ref([
-  {
-    name: "register",
+{
+    name: "numberList",
+    required: true,
+    label: "N°",
     align: "center",
-    label: "Registro",
-    field: "register",
+    field: "numberList",
+  },
+  {
+    name: "apprenticeName",
+    align: "center",
+    label: "NOMBRE APRENDIZ",
+    field: "apprenticeNameForTable",
     sortable: true,
   },
   {
-    name: "followUpInstructor",
+    name: "numberFiche",
     required: true,
-    label: "Instructor de Seguimiento",
+    label: "COD. FICHA",
     align: "center",
-    field: "followUpInstructor",
+    field: "numberFiche",
+    sortable: true,
+  },
+  {
+    name: "nameFiche",
+    label: "FICHA",
+    align: "center",
+    field: "nameFiche",
+    sortable: true,
+  },
+  {
+    name: "idModality",
+    label: "MODALIDAD",
+    align: "center",
+    field: "idModality",
+    sortable: true,
+  },
+  {
+    name: "followupInstructor",
+    label: "INS. SEGUIMIENTO",
+    align: "center",
+    field: "followupInstructor",
     sortable: true,
   },
   {
     name: "technicalInstructor",
-    required: true,
-    label: "Instructor Técnico",
-    align: "center",
+    label: "INS. TÉCNICO",
     field: "technicalInstructor",
+    align: "center",
     sortable: true,
   },
   {
     name: "projectInstructor",
-    required: true,
-    label: "Instructor de Proyecto",
-    align: "center",
+    label: "INS. PROYECTO",
     field: "projectInstructor",
-    sortable: true,
-  },
-  {
-    name: "certificationDoc",
-    required: true,
-    label: "Documento de certificación",
     align: "center",
-    field: "certificationDoc",
-    sortable: true,
-  },
-  {
-    name: "judymentPhoto",
-    label: "Foto del Juicio",
-    align: "center",
-    field: "judymentPhoto",
     sortable: true,
   },
   {
     name: "status",
-    label: "Estado",
+    label: "ESTADO",
     align: "center",
     field: "status",
     sortable: true,
   },
   {
-    name: "opciones",
-    label: "Opciones",
+    name: "magnifyingGlassButton",
+    label: "BITÁCORAS",
+    align: "center",
+    sortable: true,
+  },
+  {
+    name: "seeFollowups",
+    label: "SEGUIMIENTOS",
+    align: "center",
+    sortable: true,
+  },
+  {
+    name: "options",
+    label: "OPCIONES",
     align: "center",
     sortable: true,
   },
 ]);
 
 onBeforeMount(() => {
-  getAssignments();
+  getRegisters();
+  getApprentices();
+  getInstructors();
 });
 
-async function getAssignments() {
-  let response = await getData("Assignment/listallassignment");
-  console.log(response);
-  rows.value = response;
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx TRAER DATOS xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+async function getRegisters() {
+  try {
+  let response = await getData("Register/listallregisterwithassignment");
+  console.log('Response from getRegisters: ', response);
+  rows.value = response.register.concat(rows.value);
+} catch (error) {
+  console.log(error);
+} 
+};
+
+async function getApprentices() {
+  try {
+  let response = await getData("Apprentice/listallapprentice");
+  console.log('Response from getApprentices: ', response);
+  const dataFromApprentices = response.apprentices.map((apprentice) => ({
+    apprenticeId: apprentice._id,
+    ficheId: apprentice.fiche.idFiche,
+    nameFiche: apprentice.fiche.name,
+    numberFiche: apprentice.fiche.number,
+    apprenticeNameForSelect: `${apprentice.firstName || ""} ${apprentice.lastName || ""} - ${apprentice.fiche.name}`.trim(),
+    apprenticeNameForTable: `${apprentice.firstName || ""} ${apprentice.lastName || ""}`.trim(),
+
+  }));
+  console.log("dataFromApprentices: ", dataFromApprentices);
+  
+  apprenticeOptions.value = dataFromApprentices;
+  // rows.value = dataFromApprentices.concat(rows.value);  
+  console.log("response from getApprentices: ", response);
+  console.log("rows: ", rows.value);
+  
+} catch (error) {
+  console.log(error);
+}
+};
+
+async function getInstructors() {
+  try {
+  let response = await getData("Repfora/instructors");
+  console.log('Response from getInstructors: ', response);
+  const dataFromInstructors = response.map((instructor) => ({
+    instructorId: instructor._id,
+    instructorName: `${instructor.name} - ${instructor.thematicarea}`.trim(),
+  }));
+  instructorOptions.value = dataFromInstructors;
+} catch (error) {
+  console.log(error);
+}
+};
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx TRAER DATOS xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+async function saveAssignment() {
+  try {
+    const assignmentData = {
+      apprentice: apprentice.value.apprenticeId,
+      projectInstructor: projectInstructor.value.instructorId,
+      followupInstructor: followupInstructor.value.instructorId,
+      technicalInstructor: technicalInstructor.value.instructorId,
+    };
+    console.log("assignmentData: ", assignmentData);
+
+    if (dialogTitle.value === "EDITAR ASIGNACIÓN") {
+      console.log(idAssignment);
+
+      let response = await putData(
+        `Register/updateassignmentbyid/${idAssignment.value}`,
+        assignmentData
+      );
+
+      notifySuccessRequest("Asignación editada exitosamente");
+    } else{
+      let response = await postData("Register/addassignment", assignmentData);
+      notifySuccessRequest("Asignación guardada exitosamente");
+    }
+    dialog.value = false;
+    await getAssignments();
+  } catch (error) {
+    notifyErrorRequest("Ocurrió un error al guardar la asignación");
+    console.log(error);
+  }
+
 }
 
-const drawerOpen = ref(false);
 
 function toggleDrawer() {
   drawerOpen.value = !drawerOpen.value;
 }
 
+async function filterApprentice(val, update) {
+  if (val === "") {
+    update(() => apprenticeOptions.value);
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    return apprenticeOptions.value.filter((option) =>
+      option.apprenticeName.toLowerCase().includes(needle)
+    );
+  });
+}
+
+async function filterInstructor(val, update) {
+  if (val === "") {
+    update(() => instructorOptions.value);
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    return instructorOptions.value.filter((option) =>
+      option.instructorName.toLowerCase().includes(needle)
+    );
+  });
+}
+
 const openDialog = () => {
-  dialog.value = true;
+apprentice.value = "";
+projectInstructor.value = "";
+followupInstructor.value = "";
+technicalInstructor.value = "";
+
+dialogTitle.value = "CREAR ASIGNACIÓN";
+
+dialog.value = true;
 };
 
-const saveAssignment = async () => {
+async function toggleStatus(row) {
   try {
-    let response = await postData("Assignment/addassignment", assignmentData);
-
-    // Si la respuesta es exitosa, actualizamos la tabla y cerramos el modal
-    rows.value = response;
-    dialog.value = false;
-    notifySuccessRequest("Asignación guardada exitosamente");
+    const url = row.status === 0
+        ? `Register/enableregister/${row._id}`
+        : `Register/disableregister/${row._id}`;
+    await putData(url, {});
+    await getApprentices();
+    notifySuccessRequest("Estado cambiado exitosamente");
   } catch (error) {
-    notifyErrorRequest("Ocurrió un error al guardar la asignación");
+    notifyErrorRequest("Ocurrió un error al cambiar el estado del aprendiz");
   }
 };
 
-const toggleEstado = () => {};
+async function editAssignmentModal(row) {
+const selectApprenticeValue = apprenticeOptions.value.find(
+  (apprentice) => apprentice.apprenticeId === row.apprentice
+);
+apprentice.value = selectApprenticeValue ? selectApprenticeValue.apprenticeId : "";
+
+const selectProjectInstructorValue = instructorOptions.value.find(
+  (instructor) => instructor.instructorId === row.projectInstructor
+);
+projectInstructor.value = selectProjectInstructorValue ? selectProjectInstructorValue.instructorId : "";
+
+const selectFollowupInstructorValue = instructorOptions.value.find(
+  (instructor) => instructor.instructorId === row.followupInstructor
+);
+followupInstructor.value = selectFollowupInstructorValue ? selectFollowupInstructorValue.instructorId : "";
+
+const selectTechnicalInstructorValue = instructorOptions.value.find(
+  (instructor) => instructor.instructorId === row.technicalInstructor
+);
+technicalInstructor.value = selectTechnicalInstructorValue ? selectTechnicalInstructorValue.instructorId : "";
+
+console.log(row.projectInstructor);
+
+dialogTitle.value = "EDITAR ASIGNACIÓN";
+
+
+// await getRegisterByApprentice(row._id);
+
+dialog.value = true;
+};
 </script>
 
