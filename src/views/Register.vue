@@ -38,7 +38,19 @@
       ></Table>
     </div>
 
-
+    <TableModal v-model:dialog="TableModalDialog" :row="selectedRow" >
+        <template v-slot>
+          <div class="table-container">
+        <h5>{{ title2 }}</h5>
+        <hr id="hr" color="primary" />
+          <Table
+          :rows="rows2"
+          :columns="columns2"
+          :onClickView="openDialogWithRow"
+        ></Table>
+      </div>
+  </template>
+      </TableModal>
 
     <FormModal
         :modelValue="dialog"
@@ -216,6 +228,7 @@ import Footer from "@/components/layouts/Footer.vue";
 import Table from "@/components/tables/TableWithButtons.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
 import CustomSelect from "@/components/inputs/CustomSelect.vue";
+import TableModal from "@/components/modals/TableModal.vue"
 import FormModal from "@/components/modals/FormModal.vue";
 import Input from "@/components/inputs/CustomInput.vue";
 import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
@@ -225,6 +238,7 @@ import { getData, postData } from "@/services/apiClient.js";
 const title = ref("REGISTRO EP");
 const dialog = ref(false);
 const secondModaldialog = ref(false);
+const tableModalDialog = ref (false)
 const dialogTitle = ref("SELECCIONE MODALIDAD");
 const drawerOpen = ref(true);
 

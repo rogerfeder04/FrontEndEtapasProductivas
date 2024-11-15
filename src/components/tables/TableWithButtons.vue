@@ -20,26 +20,26 @@
         </q-td>
       </template>
 
-            <!-- v-slot para el boton de "ver" (el boton con el icono del ojo) -->
-            <template v-slot:body-cell-magnifyingGlassButton="props">
+        <!-- v-slot para el boton de "buscar" (el boton con el icono de la lupa) -->
+        <template v-slot:body-cell-magnifyingGlassButton="props">
         <q-td :props="props" id="magnifyingGlassButtonContainer">
           <TableButton
             id="buttonWhitMagnifyingGlassIcon"
             :icon="['fa', 'magnifying-glass']"
             :loading="props.row.loading"
-            :onClick="() => onClickOpenModal(props.row)"
+            :onClick="() => onClickGoToRoute(props.row)"
           />
         </q-td>
       </template>
 
-                  <!-- v-slot para el boton de "ver" (el boton con el icono del ojo) -->
-                  <template v-slot:body-cell-seeFollowups="props">
+        <!-- v-slot para el boton de "buscar" (el boton con el icono de la lupa) -->
+        <template v-slot:body-cell-seeFollowups="props">
         <q-td :props="props" id="magnifyingGlassButtonContainer">
           <TableButton
             id="buttonWhitMagnifyingGlassIcon"
             :icon="['fa', 'magnifying-glass']"
             :loading="props.row.loading"
-            :onClick="() => onClickOpenModal(props.row)"
+            :onClick="() => onClickGoToRoute(props.row)"
           />
         </q-td>
       </template>

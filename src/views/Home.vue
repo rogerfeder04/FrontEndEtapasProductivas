@@ -54,7 +54,7 @@ const cardData = ref([
   //ADMINISTRADORES:
   { route: "/apprentices", imgSrc: apprenticeCard, title: "Aprendices", roles: ["ADMIN"]},
   { route: "/fiches", imgSrc: ficheCard, title: "Fichas", roles: ["ADMIN"] },
-  { route: "/registers", imgSrc: registerCard, title: "Registro", roles: ["ADMIN"] },
+  { route: "/register", imgSrc: registerCard, title: "Registro", roles: ["ADMIN"] },
   { route: "/assignments", imgSrc: assignmentCard, title: "Asignaciones", roles: ["ADMIN"] },
   { route: "/binnacles", imgSrc: binnacleCard, title: "Bitacoras", roles: ["ADMIN"] },
   { route: "/followups", imgSrc: followupCard, title: "Seguimientos", roles: ["ADMIN"] },

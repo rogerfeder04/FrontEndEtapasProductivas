@@ -92,10 +92,10 @@ import customButton from "@/components/buttons/CustomButton.vue";
 import { ref, watch } from "vue";
 import { postData, getData } from "@/services/apiClient.js";
 import { postDataRepfora } from "@/services/apiRepfora.js";
-import { notifyErrorRequest, notifySuccessRequest, notifyWarningRequest } from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/useAuth.js";
-import { SessionStorage } from "quasar";
+
 
 const route = useRouter();
 const authStore = useAuthStore();
@@ -123,10 +123,16 @@ watch([email, password, role], () => {
 const apprenticeData = ref({
   "role": role.value.trim(),
   "email": email.value.trim(),
-  "document": document.value.trim()
+  "numDocument": document.value.trim()
 });
 
-
+watch([email, document, role], () => {
+  apprenticeData.value = {
+    role: role.value,
+    email: email.value,
+    numDocument: document.value,
+  };
+});
 
 const updateRole = (newRole) => {
   role.value = newRole;
@@ -156,7 +162,7 @@ const onSubmit = async () => {
             notifySuccessRequest("Inicio de sesión exitoso")
         }
         else {
-          let response = await postData("/Apprentice/loginApprentice", userData.value)
+          let response = await postData("/Apprentice/loginApprentice", apprenticeData.value)
           authStore.setToken(response.token);
           authStore.setRol(role.value);
             route.push("/binnacles")
@@ -168,13 +174,13 @@ const onSubmit = async () => {
     }
 };
 
-const getUserName = async () => {
-  try{
-    const response = await getData("User/getusername");
-  } catch (error) {
-    console.log(error);
-  }
+const onReset = () => {
+    role.value = "";
+    email.value = "";
+    document.value = "";
+    password.value = "";
 };
+
 
 </script>
   
