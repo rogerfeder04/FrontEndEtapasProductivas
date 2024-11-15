@@ -39,7 +39,7 @@ import registerCard from "@/assets/images/registerCard.png"
 import assignmentCard from "@/assets/images/assignmentCard.png"
 import binnacleCard from "@/assets/images/binnacleCard.png"
 import followupCard from "@/assets/images/followupCard.png"
-import instructorAssignmentscard from "@/assets/images/instructorAssignmentscard.png"
+import instructorAssignmentsCard from "@/assets/images/instructorAssignmentsCard.png"
 import instructorBinnaclesCard from "@/assets/images/instructorBinnaclesCard.png"
 import instructorFollowupsCard from "@/assets/images/instructorFollowupsCard.png"
 import instructorTimeRegisterCard from "@/assets/images/instructorTimeRegisterCard.png"
@@ -61,7 +61,7 @@ const cardData = ref([
   { route: "/reports", imgSrc: reportsCard, title: "Informes", roles: ["ADMIN"] },
 
   //INSTRUCTORES:
-  { route: "/instructor/assignments", imgSrc: instructorAssignmentscard, title: "Mis Asignaciones", roles: ["INSTRUCTOR"] },
+  { route: "/instructor/assignments", imgSrc: instructorAssignmentsCard, title: "Mis Asignaciones", roles: ["INSTRUCTOR"] },
   { route: "/instructor/binnacles", imgSrc: instructorBinnaclesCard, title: "Bitácoras", roles: ["INSTRUCTOR"] },
   { route: "/instructor/followups", imgSrc: instructorFollowupsCard, title: "Seguimientos", roles: ["INSTRUCTOR"] },
   { route: "/instructor/timeregister", imgSrc: instructorTimeRegisterCard, title: "Registro de Horas", roles: ["INSTRUCTOR"] },

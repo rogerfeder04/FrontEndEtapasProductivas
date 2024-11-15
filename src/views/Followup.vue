@@ -21,7 +21,7 @@
           id="hr" 
           color="primary"
         >
-      </div>
+      </div> <br>
 
       <Table
         :rows="rows"

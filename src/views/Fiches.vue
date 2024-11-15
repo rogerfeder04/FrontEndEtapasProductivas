@@ -15,6 +15,7 @@
           color="primary"
         >
       </div>
+      <br>
         <Table
           :rows="rows"
           :columns="columns"
