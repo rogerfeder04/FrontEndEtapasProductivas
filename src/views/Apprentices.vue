@@ -219,12 +219,12 @@ const idApprentice = ref("");
 
 const rows = ref([]);
 const columns = ref([
-{
-    name: "numberList",
+  {
+    name: "index",
     required: true,
     label: "N°",
     align: "center",
-    field: "numberList",
+    field: "index",
   },
   {
     name: "name",
@@ -311,7 +311,7 @@ async function getApprentices() {
 
   rows.value = response.apprentices.map((apprentice, index) => ({
     ...apprentice,
-    numberList: index + 1,
+    index: index + 1,
   }));
 }
 
