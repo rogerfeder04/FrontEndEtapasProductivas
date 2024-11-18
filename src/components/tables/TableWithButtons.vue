@@ -7,6 +7,54 @@
         {{ props.pageIndex + 1 }}
       </template>
 
+      <!-- v-slot para el boton de acciones desplegables de Registro EP -->
+      <template v-slot:body-cell-actions="props">
+        <q-td :props="props" class="q-pa-sm">
+          <q-fab
+            direction="left"
+            color="primary"
+            size="24px"
+            class="fab-actions"
+          >
+            <q-fab-action
+              label="Editar"
+              color="primary"
+              @click="() => onClickEdit(props.row)"
+            >
+              <font-awesome-icon :icon="['fas', 'pen-to-square']" />
+
+
+            </q-fab-action>
+            <q-fab-action
+              label="Ver Detalles"
+              to='/productivestagedetails'
+              color="primary"
+              @click="() => onViewDetails(props.row)"
+            >
+              <font-awesome-icon :icon="['fas', 'bars']" />
+
+
+            </q-fab-action>
+            <q-fab-action
+              label="Registro Horas"
+              color="primary"
+              @click="() => onDelete(props.row)"
+            >
+              <font-awesome-icon :icon="['fas', 'hourglass-half']" />
+
+
+            </q-fab-action>
+            <q-fab-action
+              label="Asignaciones"
+              color="primary"
+              @click="() => onRefresh(props.row)"
+            >
+              <font-awesome-icon :icon="['fas', 'people-arrows']" />
+            </q-fab-action>
+          </q-fab>
+        </q-td>
+      </template>
+
       <!-- v-slot para el texto del estado -->
       <template v-slot:body-cell-status="props">
         <q-td
@@ -20,30 +68,6 @@
         </q-td>
       </template>
 
-        <!-- v-slot para el boton de "buscar" (el boton con el icono de la lupa) -->
-        <template v-slot:body-cell-magnifyingGlassButton="props">
-        <q-td :props="props" id="magnifyingGlassButtonContainer">
-          <TableButton
-            id="buttonWhitMagnifyingGlassIcon"
-            :icon="['fa', 'magnifying-glass']"
-            :loading="props.row.loading"
-            :onClick="() => onClickGoToRoute(props.row)"
-          />
-        </q-td>
-      </template>
-
-        <!-- v-slot para el boton de "buscar" (el boton con el icono de la lupa) -->
-        <template v-slot:body-cell-seeFollowups="props">
-        <q-td :props="props" id="magnifyingGlassButtonContainer">
-          <TableButton
-            id="buttonWhitMagnifyingGlassIcon"
-            :icon="['fa', 'magnifying-glass']"
-            :loading="props.row.loading"
-            :onClick="() => onClickGoToRoute(props.row)"
-          />
-        </q-td>
-      </template>
-
       <!-- v-slot para el boton de "ver" (el boton con el icono del ojo) -->
       <template v-slot:body-cell-eyeButton="props">
         <q-td :props="props" id="eyeButtonContainer">
@@ -52,18 +76,6 @@
             :icon="['fa', 'eye']"
             :loading="props.row.loading"
             :onClick="() => onClickOpenModal(props.row)"
-          />
-        </q-td>
-      </template>
-
-            <!-- segundo v-slot para el boton de "ver" (el boton con el icono del ojo) -->
-      <template v-slot:body-cell-secondEyeButton="props">
-        <q-td :props="props" id="secondEyeButtonContainer">
-          <TableButton
-            class="buttonWhitEyeIcon"
-            :icon="['fa', 'eye']"
-            :loading="props.row.loading"
-            :onClick="() => onClickOpenModals(props.row)"
           />
         </q-td>
       </template>
@@ -121,6 +133,9 @@ const props = defineProps({
     type: Function,
   },
   onClickOpenModal: {
+    type: Function,
+  },
+  getActions: {
     type: Function,
   },
 });

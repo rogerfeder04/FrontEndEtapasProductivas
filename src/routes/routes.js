@@ -12,6 +12,7 @@ import InstructorsAssignments from "@/views/InstructorsAssignments.vue";
 import InstructorsBinnacles from "@/views/InstructorsBinnacles.vue";
 import InstructorsFollowups from "@/views/InstructorsFollowups.vue";
 import InstructorsTimeRegister from "@/views/InstructorsTimeRegister.vue";
+import ProductiveStageDetails from "@/views/ProductiveStageDetails.vue";
 
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/useAuth.js";
@@ -39,6 +40,7 @@ const routes = [
   { path: "/followups", component: Followups, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
   { path: "/reports", component: Reports, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
   { path: "/register", component: Register, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
+  { path: "/productivestagedetails", component: ProductiveStageDetails, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
   { path: "/apprentices", component: Apprentices, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
   { path: "/assignments", component: Assignments, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
   { path: "/instructor/assignments", component: InstructorsAssignments, beforeEnter: auth, meta: { roles: ['INSTRUCTOR'] } },

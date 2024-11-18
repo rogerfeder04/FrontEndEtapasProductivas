@@ -90,7 +90,7 @@ import InputLog from "@/components/inputs/CustomInput.vue";
 import customButton from "@/components/buttons/CustomButton.vue";
 
 import { ref, watch } from "vue";
-import { postData, getData } from "@/services/apiClient.js";
+import { postData } from "@/services/apiClient.js";
 import { postDataRepfora } from "@/services/apiRepfora.js";
 import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
 import { useRouter } from "vue-router";
@@ -104,7 +104,6 @@ const roles = ref(['INSTRUCTOR', 'ADMIN', 'CONSULTOR'])
 const email = ref("");
 const password = ref("");
 const document = ref("")
-const userName = ref("");
 
 const userData = ref({
   "role": role.value.trim(),

@@ -317,12 +317,6 @@ const columns = ref([
     sortable: true,
   },
   {
-    name: "magnifyingGlassButton",
-    align: "center",
-    label: "ASIGNACION",
-    sortable: true,
-  },
-  {
     name: "startDate",
     required: true,
     label: "FECHA INICIO",
@@ -338,21 +332,16 @@ const columns = ref([
     sortable: true,
   },
   {
-    name: "eyeButton",
-    align: "center",
-    label: "DETALLES",
-  },
-  {
-    name: "secondEyeButton",
-    align: "center",
-    label: "REGISTRO HORAS",
-  },
-  {
     name: "status",
     align: "center",
     label: "ESTADO",
     field: "endDate",
     sortable: true,
+  },
+  {
+    name: "actions",
+    align: "center",
+    label: "OPCIONES",
   },
   {
     name: "options",
