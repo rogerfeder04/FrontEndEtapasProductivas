@@ -33,28 +33,19 @@
       <Table
         :rows="rows"
         :columns="columns"
-        :onClickEdit="openDialog"
-        :onClickActivate="toggleStatus"
+        :onClickOpenModal="openDialog"
+        :onClickToggleStatus="toggleStatus"
+        :onClickEdit="editRegisterModal"
+        :onClickSeeDetails="seeRegisterDetails"
+        :onClickSeeHourReports="seeRegisterReports"
+        :onClickSeeAssignments="seeRegisterAssignments"
+        :loading="loading"
       ></Table>
     </div>
 
-    <TableModal v-model:dialog="TableModalDialog" :row="selectedRow" >
-        <template v-slot>
-          <div class="table-container">
-        <h5>{{ title2 }}</h5>
-        <hr id="hr" color="primary" />
-          <Table
-          :rows="rows2"
-          :columns="columns2"
-          :onClickView="openDialogWithRow"
-        ></Table>
-      </div>
-  </template>
-      </TableModal>
-
     <FormModal
         :modelValue="dialog"
-        :title="dialogTitle"
+        :title="modalityDialogTitle"
         @update:modelValue="dialog = $event"
         :next="nextFormModal"
       >
@@ -228,19 +219,24 @@ import Footer from "@/components/layouts/Footer.vue";
 import Table from "@/components/tables/TableWithButtons.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
 import CustomSelect from "@/components/inputs/CustomSelect.vue";
-import TableModal from "@/components/modals/TableModal.vue"
 import FormModal from "@/components/modals/FormModal.vue";
 import Input from "@/components/inputs/CustomInput.vue";
+import { useRouter } from "vue-router";
 import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
 
-import { getData, postData } from "@/services/apiClient.js";
+import { getData, postData, putData } from "@/services/apiClient.js";
 
 const title = ref("REGISTRO EP");
 const dialog = ref(false);
 const secondModaldialog = ref(false);
-const tableModalDialog = ref (false)
-const dialogTitle = ref("SELECCIONE MODALIDAD");
+const modalityDialogTitle = ref("SELECCIONE MODALIDAD");
+const dialogTitle = ref("");
 const drawerOpen = ref(true);
+const loading = ref(false);
+const router = useRouter();
+const registerId = ref("");
+
+
 
 const modalitiesOptions = ref([]);
 const apprenticeOptions = ref([]);
@@ -339,15 +335,15 @@ const columns = ref([
     sortable: true,
   },
   {
+    name: "toggleStatus",
+    label: "CAMBIAR ESTADO",
+    align: "center",
+    sortable: true,
+  },
+  {
     name: "actions",
     align: "center",
     label: "OPCIONES",
-  },
-  {
-    name: "options",
-    label: "OPCIONES",
-    align: "center",
-    sortable: true,
   },
 ]);
 
@@ -356,6 +352,7 @@ onBeforeMount(() => {
 })
 
 async function getDataForTable() {
+  loading.value = true;
   const getRegisters = await getData("Register/listallregister");
   const getApprentices = await getData("Apprentice/listallapprentice");
   const getModalities = await getData("Modality/listallmodality");
@@ -377,7 +374,7 @@ async function getDataForTable() {
       apprenticeId: apprentice._id,
       apprenticeName: `${apprentice.firstName} ${apprentice.lastName} - ${apprentice.fiche.name}`.trim(),
     }));
-
+    loading.value = false;
     return {
       ...register,
       apprenticeName: apprentice ? `${apprentice.firstName} ${apprentice.lastName}` : 'No Encontrado',
@@ -415,6 +412,21 @@ function toggleDrawer() {
 }
 
 const openDialog = () => {
+idApprentice.value = ""
+modalityId.value = ""
+startDate.value = ""
+endDate.value = ""
+company.value = ""
+phoneCompany.value = ""
+addressCompany.value = ""
+owner.value = ""
+docAlternative.value = ""
+hour.value = ""
+businessProyectHour.value = ""
+productiveProjectHour.value = ""
+mailCompany.value = ""
+  
+  dialogTitle.value = "SELECCIONE MODALIDAD";
   dialog.value = true;
 };
 
@@ -431,18 +443,67 @@ const saveRegister  = async () => {
   }
 };
 
+const editRegisterModal  = async (row) => {
+  try {
+idApprentice.value = row.idApprentice[0];
+modalityId.value = row.modalityId;
+startDate.value = formatDate(row.startDate);
+endDate.value = formatDate(row.endDate);
+company.value = row.company;
+phoneCompany.value = row.phoneCompany;
+addressCompany.value = row.addressCompany;
+owner.value = row.owner;
+docAlternative.value = row.docAlternative;
+hour.value = row.hour;
+businessProyectHour.value = row.businessProyectHour;
+productiveProjectHour.value = row.productiveProjectHour;
+mailCompany.value = row.mailCompany;
+
+    dialog.value = true;
+    dialogTitle.value = "EDITAR REGISTRO ETAPA PRODUCTIVA APRENDIZ";
+
+  } catch (error) {
+    console.log('error in editRegister: ', error);
+    
+  }
+};
+
 async function toggleStatus(row) {
   try {
+    console.log('row in toggleStatus: ', row);
+    
     const url =
       row.status === 0
         ? `Register/enableregister/${row._id}`
         : `Register/disableregister/${row._id}`;
     await putData(url, {});
-    await getRegisters();
+    await getDataForTable();
     notifySuccessRequest("Estado cambiado exitosamente");
   } catch (error) {
     notifyErrorRequest("Ocurrió un error al cambiar el estado del registro");
-  }
+    console.log('error in toggleStatus: ', error);
+      }
+};
+
+async function seeRegisterDetails(row) {
+    router.push({
+    path: '/productivestagedetails',
+    query: { registerId: row._id}
+});
+};
+
+async function seeRegisterAssignments(row) {
+    router.push({
+    path: '/assignments',
+    query: { registerId: row._id}
+});
+};
+
+async function seeRegisterReports(row) {
+    router.push({
+    path: '/reports',
+    query: { registerId: row._id}
+});
 };
 </script>
 

@@ -1,14 +1,6 @@
 <template>
     <q-layout view="lHh Lpr lff" class="layout">
       <q-page-container>
-      <Header
-        :drawerOpen="drawerOpen"
-        @toggleDrawer="toggleDrawer"
-      ></Header>
-      <Sidebar 
-        :drawerOpen="drawerOpen" 
-        @update:drawerOpen="toggleDrawer"
-      />
 
       <br>
 
@@ -36,8 +28,6 @@
 <script setup>
 import { ref, onBeforeMount } from "vue";
 
-import Header from "@/components/layouts/Header.vue";
-import Sidebar from "@/components/layouts/Sidebar.vue";
 import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
 import { getData } from "@/services/apiClient.js";
@@ -95,12 +85,6 @@ const drawerOpen = ref(true);
 ]);  
   onBeforeMount(() => {
   })
-  
-
-    
-  function toggleDrawer() {
-  drawerOpen.value = !drawerOpen.value;
-  }
   </script>
 
   

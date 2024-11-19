@@ -10,7 +10,7 @@
       @update:drawerOpen="toggleDrawer"
     />
 <br>
-    <h5 v-if="userRole === ADMIN">REGISTRO Y ASIGNACION DE SEGUIMIENTO A ETAPAS PRODUCTIVAS</h5>
+    <h5 v-if="userRole === 'ADMIN'">REGISTRO Y ASIGNACION DE SEGUIMIENTO A ETAPAS PRODUCTIVAS</h5>
     <h5 v-else>SEGUIMIENTO ETAPAS PRODUCTIVAS ASIGNADAS Y REGISTRO DE HORAS LABORADAS</h5>
 <br>
     <div class="card-container">

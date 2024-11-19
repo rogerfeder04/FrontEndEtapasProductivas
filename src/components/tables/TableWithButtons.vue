@@ -1,7 +1,7 @@
 <template>
   <div style="width: 98%">
     <h5 id="tituloPrincipal">{{ title }}</h5>
-    <q-table :rows="rows" :columns="columns" flat bordered>
+    <q-table :rows="rows" :columns="columns" flat bordered :loading="loading">
       <!-- v-slot para contar las filas -->
       <template v-slot:body-cell-numberList="props">
         {{ props.pageIndex + 1 }}
@@ -13,12 +13,13 @@
           <q-fab
             direction="left"
             color="primary"
-            size="24px"
-            class="fab-actions"
-          >
+            size="xs"
+            class="custom-fab"
+            >
             <q-fab-action
               label="Editar"
               color="primary"
+              class="custom-fab-action"
               @click="() => onClickEdit(props.row)"
             >
               <font-awesome-icon :icon="['fas', 'pen-to-square']" />
@@ -27,9 +28,9 @@
             </q-fab-action>
             <q-fab-action
               label="Ver Detalles"
-              to='/productivestagedetails'
               color="primary"
-              @click="() => onViewDetails(props.row)"
+              class="custom-fab-action"
+              @click="() => onClickSeeDetails(props.row)"
             >
               <font-awesome-icon :icon="['fas', 'bars']" />
 
@@ -38,7 +39,8 @@
             <q-fab-action
               label="Registro Horas"
               color="primary"
-              @click="() => onDelete(props.row)"
+              class="custom-fab-action"
+              @click="() => onClickSeeHourReports(props.row)"
             >
               <font-awesome-icon :icon="['fas', 'hourglass-half']" />
 
@@ -47,7 +49,8 @@
             <q-fab-action
               label="Asignaciones"
               color="primary"
-              @click="() => onRefresh(props.row)"
+              class="custom-fab-action"
+              @click="() => onClickSeeAssignments(props.row)"
             >
               <font-awesome-icon :icon="['fas', 'people-arrows']" />
             </q-fab-action>
@@ -82,7 +85,7 @@
 
       <!-- v-slot para cambiar el estado y editar -->
       <template v-slot:body-cell-options="props">
-        <q-td :props="props" id="buttonsToggleStatusContainer">
+        <q-td :props="props" id="buttonsToggleAndEditStatusContainer">
           <TableButton
             :icon="['fas', 'pen-to-square']"
             :onClick="() => onClickEdit(props.row)"
@@ -107,12 +110,39 @@
           />
         </q-td>
       </template>
+
+            <!-- v-slot para cambiar el estado -->
+            <template v-slot:body-cell-toggleStatus="props">
+        <q-td :props="props" id="buttonsToggleStatusContainer">
+
+          <TableButton
+            class="buttonStatus"
+            v-if="props.row.status === 1"
+            :icon="['fas', 'circle-check']"
+            :loading="props.row.loading"
+            :onClick="() => onClickToggleStatus(props.row)"
+            backgroundColor="#2f7d32"
+          />
+
+          <TableButton
+            class="buttonStatus"
+            v-if="props.row.status === 0"
+            :icon="['fas', 'circle-xmark']"
+            :loading="props.row.loading"
+            :onClick="() => onClickToggleStatus(props.row)"
+            backgroundColor="#C10015"
+          />
+        </q-td>
+      </template>
     </q-table>
   </div>
 </template>
 
 <script setup>
 import TableButton from "@/components/buttons/TableButton.vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const props = defineProps({
   rows: {
@@ -129,6 +159,10 @@ const props = defineProps({
   onClickEdit: {
     type: Function,
   },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
   onClickToggleStatus: {
     type: Function,
   },
@@ -138,7 +172,23 @@ const props = defineProps({
   getActions: {
     type: Function,
   },
+  onClickSeeDetails: {
+    type: Function,
+  },
+  onClickSeeHourReports: {
+    type: Function,
+  },
+  onClickSeeAssignments: {
+    type: Function,
+  },
 });
+
+const goToRoute = (route) => {
+  router.push(route);
+}
+
+
+
 </script>
 
 <style lang="scss">
@@ -210,12 +260,27 @@ td {
   padding: 0 20px;
 }
 
-#buttonsToggleStatusContainer {
+#buttonsToggleAndEditStatusContainer {
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
   justify-content: center;
   gap: 10px;
   padding-bottom: 3%;
+}
+
+#buttonsToggleStatusContainer {
+  width: 100%;
+  grid-template-columns: 1fr 3fr;
+  justify-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 10px;
+  padding-bottom: 3%;
+}
+
+.buttonStatus{
+  justify-content: center !important;
 }
 
 #eyeButtonContainer {
@@ -243,5 +308,7 @@ td {
   justify-content: center !important;
 
 }
+
+
 
 </style>

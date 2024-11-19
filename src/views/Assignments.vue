@@ -53,7 +53,7 @@
               @filter="filterApprentice"
               required
               :options="apprenticeOptions"
-              optionLabel="apprenticeName"
+              optionLabel="apprenticeNameForSelect"
               optionValue="apprenticeId"
               errorMessage="Aprendiz requerido"
               icon="users-line"
@@ -69,7 +69,7 @@
               @filter="filterInstructor"
               required
               :options="instructorOptions"
-              optionLabel="instructorNameForSelect"
+              optionLabel="instructorName"
               optionValue="instructorId"
               errorMessage="Instructor de seguimiento requerido"
               icon="chalkboard-user"
@@ -228,15 +228,15 @@ const columns = ref([
 ]);
 
 onBeforeMount(() => {
-  getRegisters();
+  getAssignments();
   getApprentices();
   getInstructors();
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx TRAER DATOS xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-async function getRegisters() {
+async function getAssignments() {
   try {
-  let response = await getData("Register/listallregisterwithassignment");
+  let response = await getData("Register/listallassignment");
   console.log('Response from getRegisters: ', response);
   rows.value = response.register.concat(rows.value);
 } catch (error) {
