@@ -1,10 +1,10 @@
 <template>
-    <q-layout view="lHh Lpr lff" class="layout">
+    <q-layout view="lHh Lpr lff">
       <q-page-container>
 
       <br>
 
-      <div class="table-container">
+      <div class="tableContainer">
         <h5>{{ title }}</h5>
 
         <div style="display:flex; align-items: center !important;">
@@ -14,7 +14,17 @@
           color="primary"
         >
       </div><br>
-  
+
+       <div class="card-container">
+      <DetailsCard 
+        v-for="(item, index) in generateCardData" 
+        :key="index" 
+        :title="item.title" 
+        :content="item.content"
+      />
+  </div>
+  <br>
+
       <Table
         :rows="rows"
         :columns="columns"
@@ -30,11 +40,11 @@ import { ref, onBeforeMount } from "vue";
 
 import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
+import DetailsCard from "@/components/cards/ProductiveStageDetailsCard.vue"
 import { getData } from "@/services/apiClient.js";
   
-const title = ref("DETALLES DE LA ETAPA PRODUCTIVA");
-const drawerOpen = ref(true);
-
+const title = ref("DETALLE ETAPA PRODUCTIVA");
+const content = ref("NOMBRES DEL APRENDIZ")
   const rows = ref([]);
   const columns = ref([
   {
@@ -85,6 +95,36 @@ const drawerOpen = ref(true);
 ]);  
   onBeforeMount(() => {
   })
+
+  const generateCardData = [
+    {title: 'Nombres Aprendiz', content: 'Daniel Silva' },
+    {title: 'Tipo Documento', content: 'CC' },
+    {title: 'Número Documento', content: '102165154' },
+    {title: 'Ficha', content: 'ANÁLISIS Y DESARROLLO DE SOFTWARE' },
+    {title: 'N° Ficha', content: '2711689' },
+    {title: 'Modalidad', content: 'Contrato de Aprendizaje' },
+    {title: 'Fecha Inicio', content: '02/02/2025' },
+    {title: 'Fecha Fin', content: '02/08/2025' },
+
+
+  ]
   </script>
 
-  
+<style scooped>
+  .card-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    justify-content: center !important;
+    gap: 2%;
+
+  }
+  .tableContainer {
+    justify-content: center !important;
+    justify-items: center !important;
+    align-items: center !important;
+    align-content: center !important;
+
+  }
+
+
+</style>

@@ -43,6 +43,8 @@ import instructorAssignmentsCard from "@/assets/images/instructorAssignmentsCard
 import instructorBinnaclesCard from "@/assets/images/instructorBinnaclesCard.png"
 import instructorFollowupsCard from "@/assets/images/instructorFollowupsCard.png"
 import instructorTimeRegisterCard from "@/assets/images/instructorTimeRegisterCard.png"
+import modalitiesCard from "@/assets/images/modalitiesCard.png"
+import certificationsCard from "@/assets/images/certificationsCard.png"
 
 import reportsCard from "@/assets/images/reportsCard.png"
 import { useAuthStore } from "@/stores/useAuth.js";
@@ -58,7 +60,10 @@ const cardData = ref([
   { route: "/assignments", imgSrc: assignmentCard, title: "Asignaciones", roles: ["ADMIN"] },
   { route: "/binnacles", imgSrc: binnacleCard, title: "Bitacoras", roles: ["ADMIN"] },
   { route: "/followups", imgSrc: followupCard, title: "Seguimientos", roles: ["ADMIN"] },
-  { route: "/reports", imgSrc: reportsCard, title: "Informes", roles: ["ADMIN"] },
+  { route: "/modalities", imgSrc: modalitiesCard, title: "Modalidades EP", roles: ["ADMIN"] },
+  { route: "/certifications", imgSrc: certificationsCard, title: "Certificaciones", roles: ["ADMIN"] },
+  { route: "/reports", imgSrc: reportsCard, title: "Informe Horas Instructores", roles: ["ADMIN"] },
+
 
   //INSTRUCTORES:
   { route: "/instructor/assignments", imgSrc: instructorAssignmentsCard, title: "Mis Asignaciones", roles: ["INSTRUCTOR"] },

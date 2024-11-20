@@ -6,6 +6,8 @@ import Followups from "@/views/Followup.vue";
 import Home from "@/views/Home.vue";
 import Reports from "@/views/Reports.vue";
 import Register from "@/views/Register.vue";
+import Modalities from "@/views/Modalities.vue";
+import Certifications from "@/views/Certifications.vue"
 import Login from "@/views/Login.vue";
 import RecoverPassword from "@/views/RecoverPassword.vue";
 import InstructorsAssignments from "@/views/InstructorsAssignments.vue";
@@ -42,7 +44,9 @@ const routes = [
   { path: "/register", component: Register, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
   { path: "/productivestagedetails", component: ProductiveStageDetails, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
   { path: "/apprentices", component: Apprentices, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
+  { path: "/modalities", component: Modalities, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
   { path: "/assignments", component: Assignments, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
+  { path: "/certifications", component: Certifications, beforeEnter: auth, meta: { roles: ['ADMIN'] } },
   { path: "/instructor/assignments", component: InstructorsAssignments, beforeEnter: auth, meta: { roles: ['INSTRUCTOR'] } },
   { path: "/instructor/binnacles", component: InstructorsBinnacles, beforeEnter: auth, meta: { roles: ['INSTRUCTOR'] } },
   { path: "/instructor/followups", component: InstructorsFollowups, beforeEnter: auth, meta: { roles: ['INSTRUCTOR'] } },

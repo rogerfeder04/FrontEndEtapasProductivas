@@ -65,6 +65,22 @@
              ></NavBarButton>
 
              <NavBarButton
+             label="Modalidades" 
+             :icon="['fas', 'shapes']" 
+             class="button" 
+             :onClickFunction="() => goToRoute('/modalities')"
+             v-if="userRole === 'ADMIN'"
+             ></NavBarButton>
+
+             <NavBarButton
+             label="Certificaciones" 
+             :icon="['fas', 'award']" 
+             class="button" 
+             :onClickFunction="() => goToRoute('/certifications')"
+             v-if="userRole === 'ADMIN'"
+             ></NavBarButton>
+
+             <NavBarButton
              label="Informes" 
              :icon="['fas', 'file-invoice']" 
              class="button" 

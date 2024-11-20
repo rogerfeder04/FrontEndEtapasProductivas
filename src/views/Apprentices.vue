@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lff" class="layout">
+  <q-layout view="lHh Lpr lff">
     <q-page-container>
       <Header
         :drawerOpen="drawerOpen"

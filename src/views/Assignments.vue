@@ -49,18 +49,17 @@
             <CustomSelect
               map-options
               label="Aprendiz"
-              v-model="apprentice"
+              v-model="apprenticeRegister"
               @filter="filterApprentice"
               required
               :options="apprenticeOptions"
               optionLabel="apprenticeNameForSelect"
-              optionValue="apprenticeId"
+              optionValue="registerId"
               errorMessage="Aprendiz requerido"
               icon="users-line"
               type="text"
             >
             </CustomSelect>
-
 
             <CustomSelect
               filled
@@ -78,7 +77,8 @@
 
 
             <CustomSelect
-              filled
+            v-if="['PROYECTO EMPRESARIAL' || 'PROYECTO PRODUCTIVO' || 'PROYECTO PRODUCTIVO  I+D' || 'PROYECTO SOCIAL'].includes(selectedModality)"
+            filled
               label="Instructor Técnico"
               v-model="technicalInstructor"
               @filter="filterInstructor"
@@ -91,7 +91,8 @@
             ></CustomSelect>
 
             <CustomSelect
-              id="modality"
+            v-if="['PROYECTO EMPRESARIAL' || 'PROYECTO PRODUCTIVO  I+D'].includes(selectedModality)"
+            id="modality"
               filled
               label="Instructor de Proyecto"
               v-model="projectInstructor"
@@ -113,19 +114,18 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, watch } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
 import Footer from "@/components/layouts/Footer.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
 import FormModal from "@/components/modals/FormModal.vue";
-import Input from "@/components/inputs/CustomInput.vue";
 import CustomSelect from "@/components/inputs/CustomSelect.vue";
 import Table from "@/components/tables/TableWithButtons.vue";
 import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
 
-import { getData } from "@/services/apiClient.js";
+import { getData, postData } from "@/services/apiClient.js";
 
 const title = ref("ASIGNACIONES");
 const dialog = ref(false);
@@ -133,13 +133,21 @@ const dialogTitle = ref("CREAR ASIGNACIÓN");
 const drawerOpen = ref(true);
 
 //v-models de los inputs
-const apprentice = ref("");
+const apprenticeRegister = ref("");
 const projectInstructor = ref("");
 const followupInstructor = ref("");
 const technicalInstructor = ref("");
 
 const apprenticeOptions = ref([]);
 const instructorOptions = ref([]);
+
+
+let assignmentResponse = null
+let registerResponse = null
+let apprenticeResponse = null
+let modalityResponse = null
+
+let selectedModality = ref("");
 
 const rows = ref([]);
 const columns = ref([
@@ -154,7 +162,7 @@ const columns = ref([
     name: "apprenticeName",
     align: "center",
     label: "NOMBRE APRENDIZ",
-    field: "apprenticeNameForTable",
+    field: "apprenticeName",
     sortable: true,
   },
   {
@@ -162,21 +170,21 @@ const columns = ref([
     required: true,
     label: "COD. FICHA",
     align: "center",
-    field: "numberFiche",
+    field: "ficheNumber",
     sortable: true,
   },
   {
     name: "nameFiche",
     label: "FICHA",
     align: "center",
-    field: "nameFiche",
+    field: "ficheName",
     sortable: true,
   },
   {
     name: "idModality",
     label: "MODALIDAD",
     align: "center",
-    field: "idModality",
+    field: "modalityName",
     sortable: true,
   },
   {
@@ -228,46 +236,115 @@ const columns = ref([
 ]);
 
 onBeforeMount(() => {
-  getAssignments();
-  getApprentices();
+  getInformation();
   getInstructors();
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx TRAER DATOS xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-async function getAssignments() {
-  try {
-  let response = await getData("Register/listallassignment");
-  console.log('Response from getRegisters: ', response);
-  rows.value = response.register.concat(rows.value);
-} catch (error) {
-  console.log(error);
-} 
-};
 
-async function getApprentices() {
-  try {
-  let response = await getData("Apprentice/listallapprentice");
-  console.log('Response from getApprentices: ', response);
-  const dataFromApprentices = response.apprentices.map((apprentice) => ({
-    apprenticeId: apprentice._id,
-    ficheId: apprentice.fiche.idFiche,
-    nameFiche: apprentice.fiche.name,
-    numberFiche: apprentice.fiche.number,
-    apprenticeNameForSelect: `${apprentice.firstName || ""} ${apprentice.lastName || ""} - ${apprentice.fiche.name}`.trim(),
-    apprenticeNameForTable: `${apprentice.firstName || ""} ${apprentice.lastName || ""}`.trim(),
 
-  }));
-  console.log("dataFromApprentices: ", dataFromApprentices);
-  
-  apprenticeOptions.value = dataFromApprentices;
-  // rows.value = dataFromApprentices.concat(rows.value);  
-  console.log("response from getApprentices: ", response);
-  console.log("rows: ", rows.value);
-  
-} catch (error) {
-  console.log(error);
+async function getInformation() {
+  try {
+    assignmentResponse = await getData("Register/listallassignment");
+    registerResponse = await getData("Register/listallregister");
+    apprenticeResponse = await getData("Apprentice/listallapprentice");
+    modalityResponse = await getData("Modality/listallmodality");
+
+    const apprenticesInRegisters = registerResponse.register
+  .map(register => ({
+    apprenticeId: register.idApprentice[0],
+    registerId: register._id,
+  }))
+  .filter(item => 
+    apprenticeResponse.apprentices.some(apprentice => apprentice._id === item.apprenticeId)
+  )
+  .map(item => {
+    const apprentice = apprenticeResponse.apprentices.find(apprentice => apprentice._id === item.apprenticeId);
+    return {
+      apprenticeNameForSelect: `${apprentice.firstName || ""} ${apprentice.lastName || ""} - ${apprentice.fiche?.name || "Sin ficha"}`.trim(),
+      registerId: item.registerId,
+    };
+  });
+
+  apprenticeOptions.value = apprenticesInRegisters;
+
+
+    // Crear mapas para acceso rápido
+    const modalityMap = modalityResponse.modality.reduce((map, modality) => {
+      map[modality._id] = modality.name;
+      return map;
+    }, {});
+
+    const apprenticeMap = apprenticeResponse.apprentices.reduce((map, apprentice) => {
+      map[apprentice._id] = apprentice;
+      return map;
+    }, {});
+
+    // Construir los datos de las filas
+    rows.value = registerResponse.register.map(register => {
+      const apprentice = apprenticeMap[register.idApprentice];
+      const modalityName = modalityMap[register.idModality] || "Sin modalidad";
+
+      const assignment = assignmentResponse.data.find(
+        assignment => assignment.registerId === register._id
+      );
+
+      console.log('assignment: ', assignment);
+      
+
+      return {
+        numberList: rows.value.length + 1, // Contador para la columna N°
+        apprenticeName: `${apprentice?.firstName || ""} ${apprentice?.lastName || ""}`,
+        ficheNumber: apprentice?.fiche?.number || "Sin ficha",
+        ficheName: apprentice?.fiche?.name || "Sin ficha",
+        modalityName: modalityName,
+        followupInstructor: assignment?.followupInstructor || "Sin asignar",
+        technicalInstructor: assignment?.technicalInstructor || "Sin asignar",
+        projectInstructor: assignment?.projectInstructor || "Sin asignar",
+        status: register.status === 1 ? "Activo" : "Inactivo",
+        registerId: register._id,
+      };
+    });
+
+    console.log("Datos combinados para la tabla: ", rows.value);
+  } catch (error) {
+    console.log("Error en getInformation: ", error);
+  }
 }
-};
+
+// Observador de apprenticeRegister
+watch(
+  () => apprenticeRegister.value, // Observamos el valor completo de apprenticeRegister
+  (newValue) => {
+    if (!newValue) {
+      selectedModality.value = "";
+      return;
+    }
+
+    // Buscar el registro correspondiente en registerResponse
+    const selectedRegister = registerResponse.register.find(
+      (register) => register._id === newValue.registerId // Asegúrate de que 'registerId' es la propiedad correcta
+    );
+
+    if (selectedRegister) {
+      const idModality = selectedRegister.idModality;
+
+      const modality = modalityResponse.modality.find(
+        (modality) => modality._id === idModality
+      );
+
+      // Asignar el nombre de la modalidad a selectedModality
+      selectedModality.value = modality ? modality.name : "Sin modalidad";
+      console.log("selectedModality: ", selectedModality.value);
+    } else {
+      selectedModality.value = "Sin modalidad"; // Si no se encuentra el registro
+    }
+  },
+  { immediate: true } // Para que también se ejecute al inicializar el componente
+);
+
+
+
 
 async function getInstructors() {
   try {
@@ -282,29 +359,35 @@ async function getInstructors() {
   console.log(error);
 }
 };
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx TRAER DATOS xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+
+
 
 async function saveAssignment() {
   try {
     const assignmentData = {
-      apprentice: apprentice.value.apprenticeId,
       projectInstructor: projectInstructor.value.instructorId,
       followupInstructor: followupInstructor.value.instructorId,
-      technicalInstructor: technicalInstructor.value.instructorId,
+      technicalInstructor: technicalInstructor.value.instructorId
     };
     console.log("assignmentData: ", assignmentData);
+
+    console.log("apprenticeRegister: ", apprenticeRegister);
+    
 
     if (dialogTitle.value === "EDITAR ASIGNACIÓN") {
       console.log(idAssignment);
 
       let response = await putData(
-        `Register/updateassignmentbyid/${idAssignment.value}`,
+        `Register/updateassignmentbyid/${apprenticeRegister.value.registerId}`,
         assignmentData
       );
 
       notifySuccessRequest("Asignación editada exitosamente");
     } else{
-      let response = await postData("Register/addassignment", assignmentData);
+      let response = await postData(`Register/addassignment/${apprenticeRegister.value.registerId}`, assignmentData);
       notifySuccessRequest("Asignación guardada exitosamente");
     }
     dialog.value = false;
@@ -335,6 +418,7 @@ async function filterApprentice(val, update) {
   });
 }
 
+
 async function filterInstructor(val, update) {
   if (val === "") {
     update(() => instructorOptions.value);
@@ -350,7 +434,7 @@ async function filterInstructor(val, update) {
 }
 
 const openDialog = () => {
-apprentice.value = "";
+apprenticeRegister.value = "";
 projectInstructor.value = "";
 followupInstructor.value = "";
 technicalInstructor.value = "";
@@ -374,34 +458,49 @@ async function toggleStatus(row) {
 };
 
 async function editAssignmentModal(row) {
-const selectApprenticeValue = apprenticeOptions.value.find(
-  (apprentice) => apprentice.apprenticeId === row.apprentice
-);
-apprentice.value = selectApprenticeValue ? selectApprenticeValue.apprenticeId : "";
+// const selectApprenticeValue = apprenticeOptions.value.find(
+//   (apprentice) => apprentice.apprenticeId === row.apprentice
+// );
+// apprentice.value = selectApprenticeValue ? selectApprenticeValue.apprenticeId : "";
 
-const selectProjectInstructorValue = instructorOptions.value.find(
-  (instructor) => instructor.instructorId === row.projectInstructor
-);
-projectInstructor.value = selectProjectInstructorValue ? selectProjectInstructorValue.instructorId : "";
+// const selectProjectInstructorValue = instructorOptions.value.find(
+//   (instructor) => instructor.instructorId === row.projectInstructor
+// );
+// projectInstructor.value = selectProjectInstructorValue ? selectProjectInstructorValue.instructorId : "";
 
-const selectFollowupInstructorValue = instructorOptions.value.find(
-  (instructor) => instructor.instructorId === row.followupInstructor
-);
-followupInstructor.value = selectFollowupInstructorValue ? selectFollowupInstructorValue.instructorId : "";
+// const selectFollowupInstructorValue = instructorOptions.value.find(
+//   (instructor) => instructor.instructorId === row.followupInstructor
+// );
+// followupInstructor.value = selectFollowupInstructorValue ? selectFollowupInstructorValue.instructorId : "";
 
-const selectTechnicalInstructorValue = instructorOptions.value.find(
-  (instructor) => instructor.instructorId === row.technicalInstructor
-);
-technicalInstructor.value = selectTechnicalInstructorValue ? selectTechnicalInstructorValue.instructorId : "";
+// const selectTechnicalInstructorValue = instructorOptions.value.find(
+//   (instructor) => instructor.instructorId === row.technicalInstructor
+// );
+// technicalInstructor.value = selectTechnicalInstructorValue ? selectTechnicalInstructorValue.instructorId : "";
 
-console.log(row.projectInstructor);
+// console.log(row.projectInstructor);
 
-dialogTitle.value = "EDITAR ASIGNACIÓN";
+// dialogTitle.value = "EDITAR ASIGNACIÓN";
 
 
-// await getRegisterByApprentice(row._id);
+// // await getRegisterByApprentice(row._id);
 
-dialog.value = true;
+// dialog.value = true;
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  // Rellenar los datos del formulario de edición
+  apprenticeRegister.value = row.registerId;
+  projectInstructor.value = row.projectInstructor;
+  followupInstructor.value = row.followupInstructor;
+  technicalInstructor.value = row.technicalInstructor;
+
+  // Obtener la modalidad del registro
+  const modality = modalityMapRef.value[row.idModality] || { name: "Sin modalidad" };
+  selectedModality.value = modality.name;
+
+  dialogTitle.value = "EDITAR ASIGNACIÓN";
+  dialog.value = true;
+
 };
 </script>
 
