@@ -61,13 +61,26 @@ const internalValue = computed({
 const closeModal = () => {
   emit('update:modelValue', false);
 };
-
-const handleSave = () => {
+const handleSave = async () => {
   if (props.onSave) {
-    props.onSave();
+    try {
+      // Ejecuta la función onSave y espera su resultado
+      const result = await props.onSave();
+
+      // Si la función retorna éxito, cierra el modal
+      if (result.success) {
+        closeModal();
+      } else {
+        // Maneja errores si result.success es falso
+        console.error("Errores en la validación:", result.errors);
+      }
+    } catch (error) {
+      // Captura errores inesperados en la función onSave
+      console.error("Error en la función onSave:", error);
+    }
   }
-  closeModal();
 };
+
 </script>
 
 

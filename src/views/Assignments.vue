@@ -222,7 +222,7 @@ const columns = ref([
     sortable: true,
   },
   {
-    name: "seeFollowups",
+    name: "eyeButton",
     label: "SEGUIMIENTOS",
     align: "center",
     sortable: true,
@@ -249,6 +249,9 @@ async function getInformation() {
     registerResponse = await getData("Register/listallregister");
     apprenticeResponse = await getData("Apprentice/listallapprentice");
     modalityResponse = await getData("Modality/listallmodality");
+
+    console.log('response from assignments:  ', assignmentResponse);
+    
 
     const apprenticesInRegisters = registerResponse.register
   .map(register => ({
@@ -362,16 +365,36 @@ async function getInstructors() {
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
-
+// {
+//   "assignment": {
+//     "followUpInstructor": {
+//       "idInstructor": "672b982271e7d8e0b4b95293",  
+//       "name": "BRAYAN JULIAN BECERRA VARGAS",
+//       "email": "BECERRAB849@GMAIL.COM"  
+//     }
+//   }
+// }
 
 
 async function saveAssignment() {
   try {
     const assignmentData = {
-      projectInstructor: projectInstructor.value.instructorId,
-      followupInstructor: followupInstructor.value.instructorId,
-      technicalInstructor: technicalInstructor.value.instructorId
-    };
+      assignment: {
+      followupInstructor: {
+        idInstructor: followupInstructor.value.instructorId,
+        name: "",
+        email: ""
+      },
+      projectInstructor: {
+        idInstructor: projectInstructor.value.instructorId,
+        name: "",
+        email: ""
+      },
+      technicalInstructor: {
+        idInstructor: technicalInstructor.value.instructorId,
+        name: "",
+        email: ""}
+    }}
     console.log("assignmentData: ", assignmentData);
 
     console.log("apprenticeRegister: ", apprenticeRegister);

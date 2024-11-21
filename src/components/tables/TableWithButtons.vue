@@ -266,6 +266,7 @@ td {
   grid-template-columns: 1fr 3fr;
   justify-content: center;
   gap: 10px;
+  margin-top: 5%;
   padding-bottom: 3%;
 }
 
