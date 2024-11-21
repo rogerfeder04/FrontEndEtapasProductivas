@@ -14,28 +14,27 @@
       :option-value="optionValue"
       :class="['select-styled', { 'input-error': hasError }]"
       @filter="filterOptions"
-      @input="handleInputChange" 
+      @update:model-value="handleInputChange" 
     >
       <template v-slot:prepend>
-        <font-awesome-icon :icon="icon"/>
-      </template> 
+        <font-awesome-icon v-if="icon" :icon="icon" />
+      </template>
 
-
-<template v-slot:no-option>
-  <q-item>
-    <q-item-section class="text-grey">
-      No hay resultados
-    </q-item-section>
-  </q-item>
-</template>
-</q-select>
-</div>
+      <template v-slot:no-option>
+        <q-item>
+          <q-item-section class="text-grey">
+            No hay resultados
+          </q-item-section>
+        </q-item>
+      </template>
+    </q-select>
+  </div>
 </template>
 
 <script setup>
-  import { ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
-  const props = defineProps({
+const props = defineProps({
   label: {
     type: String,
   },
@@ -54,7 +53,7 @@
     type: [String, Number, Object],
     default: null,
   },
-  options: { 
+  options: {
     type: Array,
     required: true,
   },
@@ -68,51 +67,57 @@
   },
 });
 
-  const internalValue = ref(props.modelValue);
-  const filteredOptions = ref(props.options);
-  const hasError = ref(false);
+const internalValue = ref(props.modelValue);
+const filteredOptions = ref([...props.options]);
+const hasError = ref(false);
 
-  const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue']);
 
-  watch(internalValue, (newValue) => {
-    emit('update:modelValue', newValue);
-  });
+// Actualiza el valor interno y emite el cambio
+watch(internalValue, (newValue) => {
+  emit('update:modelValue', newValue);
+  hasError.value = !newValue; // Marca error si está vacío
+});
 
-  watch(() => props.modelValue, (newValue) => {
+// Sincroniza los cambios externos en modelValue
+watch(
+  () => props.modelValue,
+  (newValue) => {
     internalValue.value = newValue;
-  });
+  }
+);
 
-  const filterOptions = (val, update) => {
+const filterOptions = (val, update) => {
   if (!val) {
     update(() => {
-      filteredOptions.value = props.options; // Si no hay valor, mostrar todas las opciones
+      filteredOptions.value = [...props.options]; // Mostrar todas las opciones si el valor está vacío
     });
     return;
   }
 
-  const needle = val.toLowerCase();
-  
+  const needle = val.toLowerCase(); // Convierte la entrada a minúsculas para evitar problemas con la comparación
   update(() => {
-    filteredOptions.value = props.options.filter(option => 
-      option[props.optionLabel].toLowerCase().includes(needle) // Filtrar las opciones
-    );
+    filteredOptions.value = props.options.filter((option) => {
+      const label = String(option[props.optionLabel]).toLowerCase(); // Convierte a string para evitar errores
+      return label.includes(needle); // Filtra las opciones que coinciden con el texto ingresado
+    });
   });
 };
 
 const handleInputChange = (selectedValue) => {
-  console.log("Selected Value (optionValue):", selectedValue); // Verificamos el valor seleccionado
-  emit('update:modelValue', selectedValue); // Emitimos el valor al padre
+  // Emite el valor seleccionado al padre
+  emit('update:modelValue', selectedValue);
 };
 </script>
 
 <style scoped>
 .select-styled {
   font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    transition: border-color 0.2s;
-    padding: 0px;
-    margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+  padding: 0px;
+  margin-bottom: 20px;
 }
 
 .input-error {

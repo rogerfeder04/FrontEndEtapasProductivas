@@ -134,20 +134,30 @@ const drawerOpen = ref(true);
 
 //v-models de los inputs
 const apprenticeRegister = ref("");
-const projectInstructor = ref("");
 const followupInstructor = ref("");
+const projectInstructor = ref("");
 const technicalInstructor = ref("");
 
 const apprenticeOptions = ref([]);
 const instructorOptions = ref([]);
 
 
-let assignmentResponse = null
-let registerResponse = null
-let apprenticeResponse = null
-let modalityResponse = null
+let assignmentResponse = null;
+let registerResponse = null;
+let apprenticeResponse = null;
+let modalityResponse = null;
+let responseInstructor = null;
 
 let selectedModality = ref("");
+
+let followUpInstructorName = ref("");
+let followUpInstructorEmail = ref("");
+
+let technicalInstructorName = ref("");
+let technicalInstructorEmail = ref("");
+
+let projectInstructorName = ref("");
+let projectInstructorEmail = ref("");
 
 const rows = ref([]);
 const columns = ref([
@@ -346,14 +356,86 @@ watch(
   { immediate: true } // Para que también se ejecute al inicializar el componente
 );
 
+watch(
+  () => technicalInstructor.value,
+  (newValue) => {
+    if (!newValue) {
+      technicalInstructorName.value = "";
+      technicalInstructorEmail.value = "";
+      return;
+    }
+
+    // Buscar el registro correspondiente en registerResponse
+    const selectedtechnicalInstructor = responseInstructor.find(
+      (instructor) => instructor._id === newValue.instructorId
+    );
+
+    if (selectedtechnicalInstructor) {
+      const idInstructor = selectedtechnicalInstructor.idInstructor;
+
+      const instructor = responseInstructor.find(
+        (instructor) => instructor._id === idInstructor
+      );
+
+      // Asignar el nombre de la modalidad a selectedInstructor
+      technicalInstructorName.value = selectedtechnicalInstructor.name || "Sin nombre";
+      technicalInstructorEmail.value = selectedtechnicalInstructor.email || "Sin email";
+
+      console.log("technicalInstructorName: ", technicalInstructorName.value);
+      console.log("technicalInstructorEmail: ", technicalInstructorEmail.value);
+    } else {
+      technicalInstructorName.value = "Sin nombre";
+      technicalInstructorEmail.value = "Sin email";
+
+    }
+  },
+  { immediate: true } // Para que también se ejecute al inicializar el componente
+);
+
+
+watch(
+  () => projectInstructor.value,
+  (newValue) => {
+    if (!newValue) {
+      projectInstructorName.value = "";
+      projectInstructorEmail.value = "";
+      return;
+    }
+
+    // Buscar el registro correspondiente en registerResponse
+    const selectedprojectInstructor = responseInstructor.find(
+      (instructor) => instructor._id === newValue.instructorId
+    );
+
+    if (selectedprojectInstructor) {
+      const idInstructor = selectedprojectInstructor.idInstructor;
+
+      const instructor = responseInstructor.find(
+        (instructor) => instructor._id === idInstructor
+      );
+
+      // Asignar el nombre de la modalidad a selectedInstructor
+      projectInstructorName.value = selectedprojectInstructor.name || "Sin nombre";
+      projectInstructorEmail.value = selectedprojectInstructor.email || "Sin email";
+
+      console.log("projectInstructorName: ", projectInstructorName.value);
+      console.log("projectInstructorEmail: ", projectInstructorEmail.value);
+    } else {
+      projectInstructorName.value = "Sin nombre";
+      projectInstructorEmail.value = "Sin email";
+
+    }
+  },
+  { immediate: true } // Para que también se ejecute al inicializar el componente
+);
 
 
 
 async function getInstructors() {
   try {
-  let response = await getData("Repfora/instructors");
-  console.log('Response from getInstructors: ', response);
-  const dataFromInstructors = response.map((instructor) => ({
+  responseInstructor = await getData("Repfora/instructors");
+  console.log('Response from getInstructors: ', responseInstructor);
+  const dataFromInstructors = responseInstructor.map((instructor) => ({
     instructorId: instructor._id,
     instructorName: `${instructor.name} - ${instructor.thematicarea}`.trim(),
   }));
@@ -362,6 +444,43 @@ async function getInstructors() {
   console.log(error);
 }
 };
+
+watch(
+  () => followupInstructor.value,
+  (newValue) => {
+    if (!newValue) {
+      followUpInstructorName.value = "";
+      followUpInstructorEmail.value = "";
+      return;
+    }
+
+    // Buscar el registro correspondiente en registerResponse
+    const selectedfollowUpInstructor = responseInstructor.find(
+      (instructor) => instructor._id === newValue.instructorId
+    );
+
+    if (selectedfollowUpInstructor) {
+      const idInstructor = selectedfollowUpInstructor.idInstructor;
+
+      const instructor = responseInstructor.find(
+        (instructor) => instructor._id === idInstructor
+      );
+
+      // Asignar el nombre de la modalidad a selectedInstructor
+      followUpInstructorName.value = selectedfollowUpInstructor.name || "Sin nombre";
+      followUpInstructorEmail.value = selectedfollowUpInstructor.email || "Sin email";
+
+      console.log("followUpInstructorName: ", followUpInstructorName.value);
+      console.log("followUpInstructorEmail: ", followUpInstructorEmail.value);
+    } else {
+      followUpInstructorName.value = "Sin nombre";
+      followUpInstructorEmail.value = "Sin email";
+
+    }
+  },
+  { immediate: true } // Para que también se ejecute al inicializar el componente
+);
+
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
@@ -380,20 +499,20 @@ async function saveAssignment() {
   try {
     const assignmentData = {
       assignment: {
-      followupInstructor: {
+      followUpInstructor: {
         idInstructor: followupInstructor.value.instructorId,
-        name: "",
-        email: ""
+        name: followUpInstructorName.value,
+        email: followUpInstructorEmail.value
       },
       projectInstructor: {
         idInstructor: projectInstructor.value.instructorId,
-        name: "",
-        email: ""
+        name: technicalInstructorName.value,
+        email: technicalInstructorEmail.value
       },
       technicalInstructor: {
         idInstructor: technicalInstructor.value.instructorId,
-        name: "",
-        email: ""}
+        name: projectInstructorName.value,
+        email: projectInstructorEmail.value}
     }}
     console.log("assignmentData: ", assignmentData);
 
@@ -526,4 +645,3 @@ async function editAssignmentModal(row) {
 
 };
 </script>
-

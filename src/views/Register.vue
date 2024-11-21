@@ -152,11 +152,21 @@
             icon="user-tie"
             type="text"
           />
-          <Input
+          <CustomFile
             id="docAlternative"
             filled
             label="Documento Alternativo"
             v-model="docAlternative"
+            required
+            errorMessage="Documento requerido"
+            icon="file-invoice"
+            type="text"
+          />
+          <CustomFile
+            id="certificationDoc"
+            filled
+            label="Documento de Certificación"
+            v-model="certificationDoc"
             required
             errorMessage="Documento requerido"
             icon="file-invoice"
@@ -211,7 +221,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, reactive } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
@@ -219,6 +229,7 @@ import Footer from "@/components/layouts/Footer.vue";
 import Table from "@/components/tables/TableWithButtons.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
 import CustomSelect from "@/components/inputs/CustomSelect.vue";
+import CustomFile from "@/components/inputs/CustomFile.vue";
 import FormModal from "@/components/modals/FormModal.vue";
 import Input from "@/components/inputs/CustomInput.vue";
 import { useRouter } from "vue-router";
@@ -242,6 +253,7 @@ const modalitiesOptions = ref([]);
 const apprenticeOptions = ref([]);
 
 //v-models de los inputs
+const apprentice = ref("")
 const idApprentice = ref("");
 const modalityId = ref("");
 const startDate = ref("");
@@ -251,26 +263,11 @@ const phoneCompany = ref("");
 const addressCompany = ref("");
 const owner = ref("");
 const docAlternative = ref("");
+const certificationDoc = ref("")
 const hour = ref("");
 const businessProyectHour = ref("");
 const productiveProjectHour = ref("");
 const mailCompany = ref("");
-
-const registerData = {
-  idApprentice: idApprentice.value,
-  modalityId: modalityId.value,
-  startDate: startDate.value,
-  endDate: endDate.value,
-  company: company.value,
-  phoneCompany: phoneCompany.value,
-  addressCompany: addressCompany.value,
-  owner: owner.value,
-  docAlternative: docAlternative.value,
-  hour: hour.value,
-  businessProyectHour: businessProyectHour.value,
-  productiveProjectHour: productiveProjectHour.value,
-  mailCompany: mailCompany.value,
-};
 
 const rows = ref([]);
 const columns = ref([
@@ -279,7 +276,7 @@ const columns = ref([
     required: true,
     label: "N°",
     align: "center",
-    field: "numberList",
+    field: "numberList"
   },
   {
     name: "name",
@@ -411,6 +408,13 @@ function toggleDrawer() {
   drawerOpen.value = !drawerOpen.value;
 }
 
+async function filterApprentice(val, update) {
+  if (val === "") {
+    update(() => apprenticeOptions.value);
+    return;
+  }
+};
+
 const openDialog = () => {
 idApprentice.value = ""
 modalityId.value = ""
@@ -431,13 +435,33 @@ mailCompany.value = ""
 };
 
 const saveRegister  = async () => {
-  try {
+  loading.value = true;
+    try {
+
+    const registerData = {
+    idApprentice: idApprentice.value,
+    modalityId: modalityId.value._id,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    company: company.value,
+    phoneCompany: phoneCompany.value,
+    addressCompany: addressCompany.value,
+    owner: owner.value,
+    docAlternative: docAlternative.value,
+    certificationDoc: certificationDoc.value,
+    hour: hour.value,
+    businessProyectHour: businessProyectHour.value,
+    productiveProjectHour: productiveProjectHour.value,
+    mailCompany: mailCompany.value,
+  };
+
     let response = await postData("Register/addregister", registerData);
 
     // Si la respuesta es exitosa, actualizamos la tabla y cerramos el modal
     rows.value = response;
     dialog.value = false;
     notifySuccessRequest("Asignación guardada exitosamente");
+    loading.value = false;
   } catch (error) {
     notifyErrorRequest("Ocurrió un error al guardar la asignación");
   }
@@ -506,4 +530,3 @@ async function seeRegisterReports(row) {
 });
 };
 </script>
-

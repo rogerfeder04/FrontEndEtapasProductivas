@@ -65,7 +65,11 @@ const props = defineProps({
   type: {
       type: String,
       default: 'button'
-    }
+    },
+    loading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const handleClick = async () => {
