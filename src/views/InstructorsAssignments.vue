@@ -22,10 +22,12 @@
           color="primary"
         >
       </div>
+      <br>
   
       <Table
         :rows="rows"
         :columns="columns"
+        :loading="loading"
       ></Table>
     </div>
   </q-page-container>
@@ -40,13 +42,15 @@ import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
 import Table from "@/components/tables/TableWithButtons.vue";
 import Footer from "@/components/layouts/Footer.vue";
-import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest, notifySuccessRequest } from "@/composables/Notify.vue";
 import { getData, postData } from "@/services/apiClient.js";
   
 const title = ref("MIS ASIGNACIONES");
 const dialog = ref(false);
 const drawerOpen = ref(true);
 const dialogTitle = ref("SELECCIONE MODALIDAD");
+const loading = ref(false)
+let idInstructor =ref(null)
 
 
   const rows = ref([]);
@@ -111,6 +115,8 @@ const dialogTitle = ref("SELECCIONE MODALIDAD");
 
   async function getInstructorId() {
     try {
+      loading.value = true;
+
       const response = await getData(`Repfora/instructors`);
       const selectInstructor = response.find(
         instructor => instructor.email === localStorage.getItem("userEmail")
@@ -119,19 +125,22 @@ const dialogTitle = ref("SELECCIONE MODALIDAD");
       if (selectInstructor) {
         idInstructor.value = selectInstructor._id;
       }
-      getAssignments();
+      getAssignmentsById();
     } catch (error) {
       console.log(error);
+    } finally {
+      loading.value = false;
     }
   };
 
-  const getAssignments = async () => {
+  const getAssignmentsById = async () => {
     try{
-        const response = await getData('Assignment/listallassignment')
-        console.log('response from getAssignments:  ', response);
+        const response = await getData(`Register/listassigmentbyfollowupinstructor/${idInstructor.value}`)
+        console.log('response from getAssignmentsById:  ', response);
         
     } catch (error){
-        console.error(error);
+        console.error('error from getAssignmentsById:  ', error.response.data.message);
+        notifyErrorRequest(error.response.data.message);
     }
   };
 

@@ -26,7 +26,8 @@
       <Table
         :rows="rows"
         :columns="columns"
-      ></Table>
+        :loading="loading"
+        ></Table>
     </div>
   </q-page-container>
   <Footer></Footer>
@@ -41,9 +42,11 @@ import Sidebar from "@/components/layouts/Sidebar.vue";
 import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
 import { getData } from "@/services/apiClient.js";
+import { Loading } from "quasar";
   
 const title = ref("BITÁCORAS");
 const drawerOpen = ref(true);
+const loading = ref(false)
 
   const rows = ref([]);
   const columns = ref([
@@ -100,10 +103,17 @@ const drawerOpen = ref(true);
   })
   
   async function getBinnacles() {
+  loading.value = true
+  try{
   let response = await getData("Binnacle/listallbinnacles");
   console.log('Response from getBinnacles:  ', response);
   rows.value = response;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loading.value = false;
   }
+}
     
   function toggleDrawer() {
   drawerOpen.value = !drawerOpen.value;

@@ -27,6 +27,7 @@
       <Table
         :rows="rows"
         :columns="columns"
+        :loading="loading"
       ></Table>
     </div>
 
@@ -42,12 +43,13 @@ import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
 import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
-import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest, notifySuccessRequest } from "@/composables/Notify.vue";
 
 import { getData, postData } from "@/services/apiClient.js";
 
 const title = ref("CERTIFICACIONES  ");
 const drawerOpen = ref(true);
+const loading = ref (false)
 
 const rows = ref([]);
 const columns = ref([

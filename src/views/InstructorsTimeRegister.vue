@@ -35,6 +35,7 @@
         :columns="columns"
         :onClickEdit="openDialog"
         :onClickActivate="toggleEstado"
+        :loading="loading"
       ></Table>
     </div>
         </q-page-container>
@@ -50,12 +51,13 @@ import Sidebar from "@/components/layouts/Sidebar.vue";
 import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
 
-import { notifyErrorRequest } from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest } from "@/composables/Notify.vue";
 
 import { getData } from "@/services/apiClient.js";
 
 const title = ref("Informe Horas Instructores EP");
 const drawerOpen = ref(true);
+const loading = ref(false)
 
 const rows = ref([]);
   const columns = ref([

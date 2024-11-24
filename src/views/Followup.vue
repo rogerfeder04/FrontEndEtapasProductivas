@@ -28,6 +28,7 @@
         :columns="columns"
         :onClickEdit="openDialog"
         :onClickActivate="toggleEstado"
+        :loading="loading"
       ></Table>
     </div>
   </q-page-container>
@@ -42,13 +43,14 @@ import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
 import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithSelect.vue";
-import { notifyErrorRequest } from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest } from "@/composables/Notify.vue";
 
 import { getData } from "@/services/apiClient.js";
 
 const title = ref("SEGUIMIENTOS");
 const dialog = ref(false);
 const drawerOpen = ref(true);
+const loading = ref(false)
 
 const rows = ref([]);
 const columns = ref([
@@ -104,12 +106,16 @@ onBeforeMount(() => {
 })
 
 async function getFollowUps() {
+  loading.value = true;
   try{
-  await getData("Followup/listallfollowup");
-  rows.value = response.followup;
+  let response = await getData("Followup/listallfollowup");
+  console.log('Response from getFollowUps:  ', response);
+  rows.value = response;
 } catch (error) {
   notifyErrorRequest(error.response.data.errors[0].msg);
   console.log(error);
+} finally {
+  loading.value = false
 }
 }
 

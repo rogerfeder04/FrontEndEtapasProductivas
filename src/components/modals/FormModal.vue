@@ -1,18 +1,42 @@
 <template>
-  <q-dialog v-model="internalValue" :backdrop-filter="backdropFilter"  persistent>
+  <q-dialog
+    v-model="internalValue"
+    :backdrop-filter="backdropFilter"
+    persistent
+  >
     <q-card>
       <q-card-section class="text-align-center title text-white bg-primary">
-
         {{ title }}
       </q-card-section>
 
       <q-card-section id="inputsSection">
         <slot name="content"></slot>
         <q-card-actions align="center">
-          <CustomButton text-color="grey" style="width: 40%;" label="Cancelar" color="white" @click="closeModal" :icon="['fa', 'circle-xmark']" />
-          <CustomButton v-if="title != 'SELECCIONE MODALIDAD'" label="Guardar" color="primary" style="width: 40%;" @click="handleSave" :icon="['fa', 'floppy-disk']"/>
-          <CustomButton v-if="title === 'SELECCIONE MODALIDAD'" label="Continuar" color="primary" style="width: 40%;" @click="next" :icon="['fa', 'circle-right']"/>
-
+          <CustomButton
+            text-color="grey"
+            style="width: 40%"
+            label="Cancelar"
+            color="white"
+            @click="closeModal"
+            :icon="['fa', 'circle-xmark']"
+          />
+          <CustomButton
+            v-if="title != 'SELECCIONE MODALIDAD'"
+            label="Guardar"
+            color="primary"
+            style="width: 40%"
+            @click="handleSave"
+            :loading="loadingButton"
+            :icon="['fa', 'floppy-disk']"
+          />
+          <CustomButton
+            v-if="title === 'SELECCIONE MODALIDAD'"
+            label="Continuar"
+            color="primary"
+            style="width: 40%"
+            @click="next"
+            :icon="['fa', 'circle-right']"
+          />
         </q-card-actions>
       </q-card-section>
     </q-card>
@@ -20,8 +44,8 @@
 </template>
 
 <script setup>
-import { computed, defineEmits } from 'vue';
-import CustomButton from '@/components/buttons/CustomButton.vue';
+import { computed, defineEmits } from "vue";
+import CustomButton from "@/components/buttons/CustomButton.vue";
 
 const emit = defineEmits();
 
@@ -46,7 +70,11 @@ const props = defineProps({
   next: {
     type: Function,
     required: false,
-  }
+  },
+  loadingButton: {    
+    type: Boolean,
+    default: false,
+  },
 });
 
 const internalValue = computed({
@@ -54,33 +82,25 @@ const internalValue = computed({
     return props.modelValue;
   },
   set(value) {
-    emit('update:modelValue', value);
-  }
+    emit("update:modelValue", value);
+  },
 });
 
 const closeModal = () => {
-  emit('update:modelValue', false);
+  emit("update:modelValue", false);
 };
 const handleSave = async () => {
   if (props.onSave) {
     try {
-      // Ejecuta la función onSave y espera su resultado
-      const result = await props.onSave();
-
-      // Si la función retorna éxito, cierra el modal
-      if (result.success) {
-        closeModal();
-      } else {
-        // Maneja errores si result.success es falso
-        console.error("Errores en la validación:", result.errors);
-      }
+      let response = await props.onSave();
+      console.log('response in formModal', response)
+      
     } catch (error) {
       // Captura errores inesperados en la función onSave
       console.error("Error en la función onSave:", error);
     }
   }
 };
-
 </script>
 
 
@@ -117,7 +137,7 @@ const handleSave = async () => {
   z-index: 1;
 }
 
-.q-card__actions{
+.q-card__actions {
   gap: 10%;
 }
 </style>

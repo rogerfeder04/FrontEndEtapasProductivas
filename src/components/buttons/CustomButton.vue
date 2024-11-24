@@ -68,15 +68,16 @@ const props = defineProps({
     },
     loading: {
     type: Boolean,
-    default: false,
   },
 })
 
 const handleClick = async () => {
+  loading.value = true;
   if (typeof props.onClickFunction === 'function') {
     try {
-      loading.value = true;
       await props.onClickFunction(); // Espera a que la función se complete
+    } catch (error) {
+      console.log(error);
     } finally {
       loading.value = false;
     }

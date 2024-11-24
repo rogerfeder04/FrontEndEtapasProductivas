@@ -92,7 +92,7 @@ import customButton from "@/components/buttons/CustomButton.vue";
 import { ref, watch } from "vue";
 import { postData } from "@/services/apiClient.js";
 import { postDataRepfora } from "@/services/apiRepfora.js";
-import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest, notifySuccessRequest } from "@/composables/Notify.vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/useAuth.js";
 

@@ -28,6 +28,7 @@
       <Table
         :rows="rows"
         :columns="columns"
+        :loading="loading"
       ></Table>
     </div>
   </q-page-container>
@@ -45,6 +46,8 @@ import { getData } from "@/services/apiClient.js";
   
 const title = ref("DETALLE ETAPA PRODUCTIVA");
 const content = ref("NOMBRES DEL APRENDIZ")
+const loading = ref(false)
+
   const rows = ref([]);
   const columns = ref([
   {

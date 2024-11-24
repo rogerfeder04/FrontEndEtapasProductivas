@@ -28,6 +28,9 @@ export async function postData(url, data) {
 export async function putData(url, data) {
     try {
         const response = await apiClient.put(url, data);
+        console.log('this is data from putData:  ', data);
+        console.log('this is URL from putData:  ', url);
+        
         return response.data;  // Devuelve los datos de la respuesta
     } catch (error) {
         console.error('Error en la petición PUT:', error);

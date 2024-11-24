@@ -33,6 +33,7 @@
         :columns="columns"
         :onClickEdit="openDialog"
         :onClickActivate="toggleEstado"
+        :loading="loading"
       ></Table>
     </div>
 
@@ -110,13 +111,14 @@ import CustomButton from "@/components/buttons/CustomButton.vue";
 import FormModal from "@/components/modals/FormModal.vue";
 import CustomInput from "@/components/inputs/CustomInput.vue";
 import CustomFile from "@/components/inputs/CustomFile.vue";
-import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest, notifySuccessRequest } from "@/composables/Notify.vue";
 import { getData, postData } from "@/services/apiClient.js";
   
 const title = ref("BITÁCORAS");
 const dialog = ref(false);
 const dialogTitle = ref("CREAR BITÁCORA"); 
 const drawerOpen = ref(true);
+const loading = ref(false)
 let idInstructor = ref('')
 
 //v-models de los inputs
@@ -195,6 +197,7 @@ const binnacleData = {
   })
 
   async function getInstructorId() {
+    loading.value = true
     try {
       const response = await getData(`Repfora/instructors`);
       const selectInstructor = response.find(
@@ -207,6 +210,8 @@ const binnacleData = {
       getBinnacles();
     } catch (error) {
       console.log(error);
+    } finally {
+      loading.value = false;
     }
   }
   

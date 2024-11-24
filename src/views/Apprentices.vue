@@ -44,6 +44,7 @@
           :columns="columns"
           :onClickEdit="editApprenticeModal"
           :onClickToggleStatus="toggleStatus"
+          :loading="loading"
         >
         </Table>
       </div>
@@ -190,7 +191,7 @@ import CustomButton from "@/components/buttons/CustomButton.vue";
 import FormModal from "@/components/modals/FormModal.vue";
 import Input from "@/components/inputs/CustomInput.vue";
 import CustomSelect from "@/components/inputs/CustomSelect.vue";
-import { notifyErrorRequest, notifySuccessRequest} from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest, notifySuccessRequest} from "@/composables/Notify.vue";
 
 import { getData, postData, putData } from "@/services/apiClient.js";
 
@@ -198,6 +199,7 @@ const title = ref("APRENDICES");
 const dialog = ref(false);
 const dialogTitle = ref("CREAR APRENDIZ");
 const drawerOpen = ref(true);
+let loading = ref(false)
 
 //v-models de los inputs
 const fiche = ref("");
@@ -302,6 +304,8 @@ onBeforeMount(() => {
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx TRAER DATOS xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 async function getApprentices() {
+  try {
+    loading.value = true
   let response = await getData("Apprentice/listallapprentice");
   
   const dataFromApprentices = response.apprentices.map((apprentice) => ({
@@ -313,10 +317,17 @@ async function getApprentices() {
     ...apprentice,
     index: index + 1,
   }));
+} catch (error) {
+  console.log(error);
+} finally {
+  loading.value = false
 }
+};
 
 async function getFiches() {
   try {
+    loading.value = true
+
     const response = await getData("Repfora/fiches");
     console.log("response from getFiches:  ", response);
 
@@ -329,11 +340,14 @@ async function getFiches() {
     fichesOptions.value = dataFromFiches;
   } catch (error) {
     console.error("Error al obtener fichas:", error);
+  } finally {
+    loading.value = false
   }
 }
 
 async function getModalities() {
   try {
+    loading.value = true
     let response = await getData("Modality/listallmodality");
     modalitiesOptions.value = response.modality.map((modality) => ({
       _id: modality._id,
@@ -342,11 +356,14 @@ async function getModalities() {
     // console.log("response from getModalities:  ", response);
   } catch (error) {
     console.log("getModalities Apprentices.vue:  ", error);
+  } finally {
+    loading.value = false
   }
 }
 
 async function getRegisterByApprentice(id) {
   try {
+    loading.value = true
     const response = await getData(
       `Register/listRegisterByApprentice/${id}`
     );
@@ -367,6 +384,8 @@ async function getRegisterByApprentice(id) {
     }
   } catch (error) {
     console.log(error);
+  } finally {
+    loading.value = false
   }
 }
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

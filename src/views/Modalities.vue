@@ -35,6 +35,7 @@
         :columns="columns"
         :onClickEdit="openDialog"
         :onClickActivate="toggleStatus"
+        :loading="loading"
       ></Table>
     </div>
 
@@ -103,7 +104,7 @@ import Table from "@/components/tables/TableWithButtons.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
 import FormModal from "@/components/modals/FormModal.vue";
 import InputLog from "@/components/inputs/CustomInput.vue";
-import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest, notifySuccessRequest } from "@/composables/Notify.vue";
 
 import { getData, postData } from "@/services/apiClient.js";
 
@@ -111,6 +112,7 @@ const title = ref("MODALIDADES");
 const dialog = ref(false);
 const dialogTitle = ref("CREAR MODALIDAD");
 const drawerOpen = ref(true);
+const loading = ref(false)
 
 
 //v-models de los inputs
@@ -183,9 +185,16 @@ onBeforeMount( ()=> {
 })
 
 async function getModalities() {
+  try{
+    loading.value = true
   let response = await getData(`Modality/listallmodality`);
   console.log(response);
   rows.value = response.modality;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loading.value = false
+  }
 }
 
 function toggleDrawer() {

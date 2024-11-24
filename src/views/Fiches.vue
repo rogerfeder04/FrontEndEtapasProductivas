@@ -21,6 +21,7 @@
           :columns="columns"
           :onClickToggleStatus="toggleEstado"
           :onClickOpenModal="openDialogWithRow"
+          :loading="loading"
         ></Table>
       </div>
 
@@ -51,6 +52,7 @@ import Table from "@/components/tables/TableWithButtons.vue";
 import TableModal from "@/components/modals/TableModal.vue";
 import { getData } from "@/services/apiClient.js";
 import TableWithoutButtons from "@/components/tables/TableWithoutButtons.vue";
+import { Loading } from "quasar";
 
 const title = ref("FICHAS");
 const title2 = ref("INFORME DE APRENDICES POR FICHAS");
@@ -58,6 +60,7 @@ const title2 = ref("INFORME DE APRENDICES POR FICHAS");
 const drawerOpen = ref(true);
 const dialog = ref(false);
 const selectedRow = ref(null);
+let loading = ref(false)
 
 const rows = ref([]);
 const columns = ref([
@@ -173,9 +176,16 @@ onBeforeMount(() => {
 });
 
 async function getFiches() {
+  try {
+    loading.value = true
   let response = await getData("Repfora/fiches");
   rows.value = response;
+} catch (error) {
+  console.log(error);
+} finally {
+  loading.value = false
 }
+};
 
 async function getApprenticesByFiche(ficheId) {
   let response = await getData(`Apprentice/listapprenticebyfiche/${ficheId}`);

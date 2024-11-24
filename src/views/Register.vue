@@ -48,6 +48,7 @@
         :title="modalityDialogTitle"
         @update:modelValue="dialog = $event"
         :next="nextFormModal"
+        :loadingButton="loadingButton"
       >
         <template #content>
           <div class="input-grid">
@@ -92,7 +93,7 @@
             >
             </CustomSelect>
 
-          <Input
+          <CustomInput
             id="startDate"
             filled
             label="Fecha de Inicio"
@@ -102,7 +103,7 @@
             icon="calendar-days"
             type="date"
           />
-          <Input
+          <CustomInput
             id="endDate"
             filled
             label="Fecha de Fin"
@@ -112,7 +113,7 @@
             icon="calendar-days"
             type="date"
           />
-          <Input
+          <CustomInput
             id="company"
             filled
             label="Nombre de la Empresa"
@@ -122,7 +123,7 @@
             icon="spell-check"
             type="text"
           />
-          <Input
+          <CustomInput
             id="phoneCompany"
             filled
             label="Teléfono de la empresa"
@@ -132,7 +133,7 @@
             icon="phone"
             type="text"
           />
-          <Input
+          <CustomInput
             id="addressCompany"
             filled
             label="Dirección de la empresa"
@@ -142,7 +143,7 @@
             icon="map-location-dot"
             type="text"
           />
-          <Input
+          <CustomInput
             id="owner"
             filled
             label="Dueño de la Empresa"
@@ -152,7 +153,9 @@
             icon="user-tie"
             type="text"
           />
-          <CustomFile
+
+          <!-- Cambiar CustomInput por CustomFile cuando se arregle el backend -->
+          <CustomInput
             id="docAlternative"
             filled
             label="Documento Alternativo"
@@ -162,7 +165,9 @@
             icon="file-invoice"
             type="text"
           />
-          <CustomFile
+
+          <!-- Cambiar CustomInput por CustomFile cuando se arregle el backend -->
+          <CustomInput
             id="certificationDoc"
             filled
             label="Documento de Certificación"
@@ -172,7 +177,7 @@
             icon="file-invoice"
             type="text"
           />
-          <Input
+          <CustomInput
             id="hour"
             filled
             label="Horas"
@@ -182,7 +187,7 @@
             icon="clock"
             type="text"
           />
-          <Input
+          <CustomInput
             id="businessProyectHour"
             filled
             label="Horas del Proyecto de Negocio"
@@ -192,7 +197,7 @@
             icon="stopwatch"
             type="text"
           />
-          <Input
+          <CustomInput
             id="productiveProjectHour"
             filled
             label="Horas del Proyecto Productivo"
@@ -202,7 +207,7 @@
             icon="stopwatch"
             type="text"
           />
-          <Input
+          <CustomInput
             id="mailCompany"
             filled
             label="Email de la empresa"
@@ -221,7 +226,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount, reactive } from "vue";
+import { ref, onBeforeMount } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
@@ -231,9 +236,9 @@ import CustomButton from "@/components/buttons/CustomButton.vue";
 import CustomSelect from "@/components/inputs/CustomSelect.vue";
 import CustomFile from "@/components/inputs/CustomFile.vue";
 import FormModal from "@/components/modals/FormModal.vue";
-import Input from "@/components/inputs/CustomInput.vue";
+import CustomInput from "@/components/inputs/CustomInput.vue";
 import { useRouter } from "vue-router";
-import { notifyErrorRequest, notifySuccessRequest } from "@/composables/notify/Notify.vue";
+import { notifyErrorRequest, notifySuccessRequest } from "@/composables/Notify.vue";
 
 import { getData, postData, putData } from "@/services/apiClient.js";
 
@@ -244,6 +249,7 @@ const modalityDialogTitle = ref("SELECCIONE MODALIDAD");
 const dialogTitle = ref("");
 const drawerOpen = ref(true);
 const loading = ref(false);
+const loadingButton = ref(false);
 const router = useRouter();
 const registerId = ref("");
 
@@ -254,7 +260,6 @@ const apprenticeOptions = ref([]);
 
 //v-models de los inputs
 const apprentice = ref("")
-const idApprentice = ref("");
 const modalityId = ref("");
 const startDate = ref("");
 const endDate = ref("");
@@ -350,6 +355,7 @@ onBeforeMount(() => {
 
 async function getDataForTable() {
   loading.value = true;
+  try {
   const getRegisters = await getData("Register/listallregister");
   const getApprentices = await getData("Apprentice/listallapprentice");
   const getModalities = await getData("Modality/listallmodality");
@@ -371,7 +377,6 @@ async function getDataForTable() {
       apprenticeId: apprentice._id,
       apprenticeName: `${apprentice.firstName} ${apprentice.lastName} - ${apprentice.fiche.name}`.trim(),
     }));
-    loading.value = false;
     return {
       ...register,
       apprenticeName: apprentice ? `${apprentice.firstName} ${apprentice.lastName}` : 'No Encontrado',
@@ -384,6 +389,11 @@ async function getDataForTable() {
   });
 
   rows.value = registersWithApprenticeAndModality;
+} catch (error) {
+  console.log('error in getDataForTable: ', error);
+} finally {
+  loading.value = false;
+}
 };
 
 
@@ -416,7 +426,7 @@ async function filterApprentice(val, update) {
 };
 
 const openDialog = () => {
-idApprentice.value = ""
+apprentice.value = ""
 modalityId.value = ""
 startDate.value = ""
 endDate.value = ""
@@ -435,12 +445,11 @@ mailCompany.value = ""
 };
 
 const saveRegister  = async () => {
-  loading.value = true;
+  loadingButton.value = true;
     try {
-
     const registerData = {
-    idApprentice: idApprentice.value,
-    modalityId: modalityId.value._id,
+    idApprentice : apprentice.value.apprenticeId,
+    idModality: modalityId.value._id,
     startDate: startDate.value,
     endDate: endDate.value,
     company: company.value,
@@ -457,31 +466,36 @@ const saveRegister  = async () => {
 
     let response = await postData("Register/addregister", registerData);
 
-    // Si la respuesta es exitosa, actualizamos la tabla y cerramos el modal
-    rows.value = response;
-    dialog.value = false;
-    notifySuccessRequest("Asignación guardada exitosamente");
-    loading.value = false;
+    // rows.value = response.data;
+    getDataForTable()
+    secondModaldialog.value = false;
+    notifySuccessRequest("Registro guardado exitosamente");
   } catch (error) {
     notifyErrorRequest("Ocurrió un error al guardar la asignación");
+  } finally {
+    loadingButton.value = false;
+
   }
 };
 
 const editRegisterModal  = async (row) => {
   try {
-idApprentice.value = row.idApprentice[0];
-modalityId.value = row.modalityId;
-startDate.value = formatDate(row.startDate);
-endDate.value = formatDate(row.endDate);
+    console.log('row in editRegisterModal: ', row);
+    
+apprentice.value = row.idApprentice[0];
+modalityId.value = row.idModality;
+startDate.value = row.startDate;
+endDate.value = row.endDate;
 company.value = row.company;
 phoneCompany.value = row.phoneCompany;
 addressCompany.value = row.addressCompany;
+mailCompany.value = row.mailCompany;
 owner.value = row.owner;
 docAlternative.value = row.docAlternative;
+certificationDoc.value = row.certificationDoc,
 hour.value = row.hour;
 businessProyectHour.value = row.businessProyectHour;
 productiveProjectHour.value = row.productiveProjectHour;
-mailCompany.value = row.mailCompany;
 
     dialog.value = true;
     dialogTitle.value = "EDITAR REGISTRO ETAPA PRODUCTIVA APRENDIZ";
