@@ -16,51 +16,52 @@
         >
       </div>
       <br>
+      <div style="display: flex; gap: 10px;">
+      <CustomInput
+        filled
+        :label="placeholderText"
+        v-model="pursuitOfFiche"
+        icon="magnifying-glass"
+      />
+      <RadioButton
+        label="Nombre de Ficha"
+        v-model="selectedFilter"
+        value="nameFiche"
+      />
+      <RadioButton
+        label="Número de Ficha"
+        v-model="selectedFilter"
+        value="numberFiche"
+      />
+    </div>
         <Table
-          :rows="rows"
+          :rows="filteredRows"
           :columns="columns"
-          :onClickToggleStatus="toggleEstado"
-          :onClickOpenModal="openDialogWithRow"
           :loading="loading"
         ></Table>
       </div>
-
-      <TableModal v-model:dialog="dialog" :row="selectedRow" >
-        <template v-slot>
-          <div class="table-container">
-        <h5>{{ title2 }}</h5>
-        <hr id="hr" color="primary" />
-          <Table
-          :rows="rows2"
-          :columns="columns2"
-          :onClickView="openDialogWithRow"
-        ></Table>
-      </div>
-  </template>
-      </TableModal>
     </q-page-container>
     <Footer></Footer>
   </q-layout>
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, computed, watch } from "vue";
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
+import RadioButton from "@/components/buttons/RadioButton.vue"
+import CustomInput from "@/components/inputs/CustomInput.vue";
 import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
-import TableModal from "@/components/modals/TableModal.vue";
 import { getData } from "@/services/apiClient.js";
-import TableWithoutButtons from "@/components/tables/TableWithoutButtons.vue";
-import { Loading } from "quasar";
 
 const title = ref("FICHAS");
-const title2 = ref("INFORME DE APRENDICES POR FICHAS");
-
+const pursuitOfFiche = ref("");
+const selectedFilter = ref("");
 const drawerOpen = ref(true);
-const dialog = ref(false);
-const selectedRow = ref(null);
-let loading = ref(false)
+let loading = ref(false);
+
+const filteredRows = ref([]);
 
 const rows = ref([]);
 const columns = ref([
@@ -101,75 +102,6 @@ const columns = ref([
   },
 ]);
 
-const rows2 = ref([]);
-const columns2 = ref([
-  {
-    name: "numberList",
-    required: true,
-    label: "N°",
-    align: "center",
-    field: "numberList",
-  },
-  {
-    name: "name",
-    required: true,
-    label: "NOMBRE APRENDIZ",
-    align: "center",
-    field: (row) => `${row.firstName || ""} ${row.lastName || ""}`.trim(),
-    sortable: true,
-  },
-  {
-    name: "tpDocument",
-    align: "center",
-    label: "TIPO DOCUMENTO",
-    field: "tpDocument",
-    sortable: true,
-  },
-  {
-    name: "numDocument",
-    align: "center",
-    label: "N° DOCUMENTO",
-    field: "numDocument",
-  },
-  {
-    name: "personalEmail",
-    align: "center",
-    label: "EMAIL PERSONAL",
-    field: "personalEmail",
-  },
-  {
-    name: "institutionalEmail",
-    align: "center",
-    label: "EMAIL INSTITUCIONAL",
-    field: "institutionalEmail",
-  },
-  {
-    name: "phone",
-    align: "center",
-    label: "TEL.",
-    field: "phone",
-  },
-  {
-    name: "fiche",
-    label: "FICHA",
-    align: "center",
-    field: (row) => row.fiche.name,
-  },
-  {
-    name: "ficheCode",
-    label: "COD. FICHA",
-    align: "center",
-    field: (row) => row.fiche.number,
-    sortable: true,
-  },
-  {
-    name: "status",
-    label: "ESTADO",
-    align: "center",
-    field: "status",
-    sortable: true,
-  },
-]);
 
 onBeforeMount(() => {
   getFiches();
@@ -180,6 +112,9 @@ async function getFiches() {
     loading.value = true
   let response = await getData("Repfora/fiches");
   rows.value = response;
+  applyFilters();
+  console.log('rows', rows.value)
+  
 } catch (error) {
   console.log(error);
 } finally {
@@ -187,25 +122,53 @@ async function getFiches() {
 }
 };
 
-async function getApprenticesByFiche(ficheId) {
-  let response = await getData(`Apprentice/listapprenticebyfiche/${ficheId}`);
-  console.log("response from getApprenticesByFiche: ", response);
-  rows2.value = response.apprentices;
-}
-
-const openDialogWithRow = (row) => {
-  selectedRow.value = row;
-  dialog.value = true;
-  console.log('row: ', row);
-  
-  getApprenticesByFiche(row._id); 
-};
 
 function toggleDrawer() {
   drawerOpen.value = !drawerOpen.value;
 }
 
-function toggleEstado(row) {
-  row.estado = row.estado === 1 ? 0 : 1;
+const placeholderText = computed(() => {
+  switch (selectedFilter.value) {
+    case "nameFiche":
+      return "Nombre de la ficha";
+    case "numberFiche":
+      return "Número de ficha";
+    default:
+      return "Buscar por...";
+  }
+});
+
+
+function applyFilters() {
+  const searchValue = pursuitOfFiche.value.trim().toLowerCase(); // Convertir la búsqueda a minúsculas
+
+  // Si no hay texto o filtro seleccionado, mostramos todas las filas
+  if (!searchValue || !selectedFilter.value) {
+    filteredRows.value = rows.value;
+    return;
+  }
+
+  // Aplicar filtros basados en el filtro seleccionado
+  switch (selectedFilter.value) {
+    case "nameFiche":
+      // Filtrar por nombre de ficha (program.name)
+      filteredRows.value = rows.value.filter((row) =>
+        row.program.name.toLowerCase().includes(searchValue)
+      );
+      break;
+    case "numberFiche":
+      // Filtrar por número de ficha
+      filteredRows.value = rows.value.filter((row) =>
+        row.number.toLowerCase().includes(searchValue)
+      );
+      break;
+    default:
+      // Si no hay filtro válido, devolver todas las filas
+      filteredRows.value = rows.value;
+  }
 }
+
+// Escuchar cambios en los valores de búsqueda y filtro
+watch([pursuitOfFiche, selectedFilter], applyFilters);
+
 </script>

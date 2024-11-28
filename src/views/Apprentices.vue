@@ -23,6 +23,8 @@
         >
       </div>
 
+      <div style="display:flex; gap: 20px !important; gap: 22%;">
+
       <div style="display: inline-flex; gap: 10px; margin-top: 1.5%">
         <CustomButton 
           label="CREAR APRENDIZ" 
@@ -37,10 +39,32 @@
           :icon="['fa', 'file-arrow-up']"
           >
         </CustomButton>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+      <CustomInput
+        filled
+        :label="placeholderText"
+        v-model="pursuitOfApprentice"
+        icon="magnifying-glass"
+      />
+      <RadioButton
+        label="Aprendiz"
+        v-model="selectedFilter"
+        value="apprentice"
+      />
+      <RadioButton
+        label="Ficha"
+        v-model="selectedFilter"
+        value="fiche"
+      />
+    </div>
+
+
       </div>
       <br> <br>
         <Table
-          :rows="rows"
+          :rows="filteredRows"
           :columns="columns"
           :onClickEdit="editApprenticeModal"
           :onClickToggleStatus="toggleStatus"
@@ -80,7 +104,7 @@
               </template>
             </CustomSelect>
 
-            <Input
+            <CustomInput
               id="firstName"
               filled
               label="Nombres del Aprendiz"
@@ -91,7 +115,7 @@
               type="text"
             />
 
-            <Input
+            <CustomInput
               id="lastName"
               filled
               label="Apellidos del Aprendiz"
@@ -114,7 +138,7 @@
               type="text"
             ></CustomSelect>
 
-            <Input
+            <CustomInput
               id="numDocument"
               filled
               label="N° Documento del Aprendiz"
@@ -125,7 +149,7 @@
               type="text"
             />
 
-            <Input
+            <CustomInput
               id="email"
               filled
               label="Email Personal"
@@ -136,7 +160,7 @@
               type="text"
             />
 
-            <Input
+            <CustomInput
               id="email"
               filled
               label="Email Institucional"
@@ -147,7 +171,7 @@
               type="text"
             />
 
-            <Input
+            <CustomInput
               id="phone"
               filled
               label="Teléfono del Aprendiz"
@@ -181,7 +205,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, computed, watch } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
@@ -189,7 +213,8 @@ import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
 import FormModal from "@/components/modals/FormModal.vue";
-import Input from "@/components/inputs/CustomInput.vue";
+import CustomInput from "@/components/inputs/CustomInput.vue";
+import RadioButton from "@/components/buttons/RadioButton.vue"
 import CustomSelect from "@/components/inputs/CustomSelect.vue";
 import { notifyErrorRequest, notifySuccessRequest} from "@/composables/Notify.vue";
 
@@ -199,7 +224,10 @@ const title = ref("APRENDICES");
 const dialog = ref(false);
 const dialogTitle = ref("CREAR APRENDIZ");
 const drawerOpen = ref(true);
+const selectedFilter = ref("");
+const pursuitOfApprentice =ref("")
 let loading = ref(false)
+
 
 //v-models de los inputs
 const fiche = ref("");
@@ -219,6 +247,8 @@ const modalitiesOptions = ref([]);
 
 const idApprentice = ref("");
 
+const filteredRows = ref([]);
+
 const rows = ref([]);
 const columns = ref([
   {
@@ -234,7 +264,6 @@ const columns = ref([
     label: "NOMBRE APRENDIZ",
     align: "center",
     field: (row) => `${row.firstName || ""} ${row.lastName || ""}`.trim(),
-    sortable: true,
   },
   {
     name: "tpDocument",
@@ -299,7 +328,7 @@ const columns = ref([
 onBeforeMount(() => {
   getApprentices();
   getFiches();
-  getModalities();
+  getModalities();  
 });
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx TRAER DATOS xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -317,6 +346,10 @@ async function getApprentices() {
     ...apprentice,
     index: index + 1,
   }));
+
+  applyFilters();
+  console.log("rows:  ", rows.value);
+
 } catch (error) {
   console.log(error);
 } finally {
@@ -480,10 +513,13 @@ async function toggleStatus(row) {
 async function editApprenticeModal(row) {
   idApprentice.value = row._id;
 
-  const CustomselectedFiche = fichesOptions.value.find(
+  const CustomSelectedFiche = fichesOptions.value.find(
     (fiche) => fiche.idFiche === row.fiche.idFiche
   );
-  fiche.value = CustomselectedFiche ? CustomselectedFiche.idFiche : "";
+console.log('CustomSelectedFiche:   ', CustomSelectedFiche);
+
+  const NameForEditSelect = CustomSelectedFiche
+  fiche.value = CustomSelectedFiche ? CustomSelectedFiche.idFiche : "";
 
   tpDocument.value = row.tpDocument;
   numDocument.value = row.numDocument;
@@ -502,4 +538,64 @@ async function editApprenticeModal(row) {
 
   dialog.value = true;
 };
+
+
+const placeholderText = computed(() => {
+  switch (selectedFilter.value) {
+    case "apprentice":
+      return "Nombre o Documento";
+    case "fiche":
+      return "Número de ficha";
+    case "status":
+      return "Estado del aprendiz";
+    default:
+      return "Buscar por...";
+  }
+});
+
+function applyFilters() {
+  if (!pursuitOfApprentice.value.trim()) {
+    filteredRows.value = rows.value;
+    return;
+  }
+};
+
+const searchValue = pursuitOfApprentice.value.toLowerCase();
+  switch (selectedFilter.value) {
+    case "apprentice":
+      filteredRows.value = rows.value.filter(row =>
+        (`${row.firstName} ${row.lastName}`.toLowerCase().includes(searchValue))
+      );
+      break;
+    case "fiche":
+      filteredRows.value = rows.value.filter(row =>
+        (`${row.fiche.name} ${row.fiche.number}`.toLowerCase().includes(searchValue))
+  );
+      break;
+    default:
+      filteredRows.value = rows.value;
+  }
+
+
+  watch([pursuitOfApprentice, selectedFilter], ([newSearch, newFilter]) => {
+  if (!newSearch || !newFilter) {
+    filteredRows.value = rows.value;
+    return;
+  }
+
+  console.log("Filtrando por:", newSearch, "en:", newFilter);
+  console.log("rows:  ", rows);
+  
+  filteredRows.value = rows.value.filter((row) => {
+    if (newFilter === "apprentice") {
+      return `${row.firstName} ${row.lastName} ${row.numDocument}`.toLowerCase().includes(newSearch.toLowerCase());
+    }
+    if (newFilter === "fiche") {
+      return `${row.fiche.name} ${row.fiche.number}`.toLowerCase().includes(newSearch);
+    }
+    return true;
+  });
+
+  console.log("Resultados filtrados:", filteredRows.value);
+});
 </script>

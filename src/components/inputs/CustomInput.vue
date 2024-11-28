@@ -43,7 +43,7 @@
   const props = defineProps({
     id: {
       type: String,
-      required: true,
+      required: false,
     },
     modelValue: {
       type: [String, Number],
