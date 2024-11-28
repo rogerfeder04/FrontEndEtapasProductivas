@@ -30,8 +30,32 @@
           >
         </CustomButton>
 
+        <div style="display: flex; gap: 10px;">
+      <CustomInput
+        filled
+        :label="placeholderText"
+        v-model="pursuitOfAssignment"
+        icon="magnifying-glass"
+      />
+      <RadioButton
+        label="Ins. Seguimiento"
+        v-model="selectedFilter"
+        value="followupInstructor"
+      />
+      <RadioButton
+        label="Ins. Técnico"
+        v-model="selectedFilter"
+        value="technicalInstructor"
+      />
+      <RadioButton
+        label="Ins. de Proyecto"
+        v-model="selectedFilter"
+        value="projectInstructor"
+      />
+    </div>
+
         <Table
-          :rows="rows"
+          :rows="filteredRows"
           :columns="columns"
           :onClickEdit="editAssignmentModal"
           :onClickToggleStatus="toggleStatus"
@@ -78,7 +102,7 @@
 
 
             <CustomSelect
-            v-if="['PROYECTO EMPRESARIAL' || 'PROYECTO PRODUCTIVO' || 'PROYECTO PRODUCTIVO  I+D' || 'PROYECTO SOCIAL'].includes(selectedModality)"
+            v-if="['PROYECTO EMPRESARIAL', 'PROYECTO PRODUCTIVO', 'PROYECTO PRODUCTIVO I+D', 'PROYECTO SOCIAL'].includes(selectedModality)"
             filled
               label="Instructor Técnico"
               v-model="technicalInstructor"
@@ -92,7 +116,7 @@
             ></CustomSelect>
 
             <CustomSelect
-            v-if="['PROYECTO EMPRESARIAL' || 'PROYECTO PRODUCTIVO  I+D'].includes(selectedModality)"
+            v-if="['PROYECTO EMPRESARIAL', 'PROYECTO PRODUCTIVO I+D'].includes(selectedModality)"
             id="modality"
               filled
               label="Instructor de Proyecto"
@@ -115,12 +139,14 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount, watch } from "vue";
+import { ref, onBeforeMount, watch, computed } from "vue";
 
 import Header from "@/components/layouts/Header.vue";
 import Sidebar from "@/components/layouts/Sidebar.vue";
 import Footer from "@/components/layouts/Footer.vue";
 import CustomButton from "@/components/buttons/CustomButton.vue";
+import RadioButton from "@/components/buttons/RadioButton.vue"
+import CustomInput from "@/components/inputs/CustomInput.vue";
 import FormModal from "@/components/modals/FormModal.vue";
 import CustomSelect from "@/components/inputs/CustomSelect.vue";
 import Table from "@/components/tables/TableWithButtons.vue";
@@ -133,6 +159,8 @@ const dialog = ref(false);
 const dialogTitle = ref("CREAR ASIGNACIÓN");
 const drawerOpen = ref(true);
 const loading = ref(false);
+const pursuitOfAssignment = ref("");
+const selectedFilter = ref("");
 
 //v-models de los inputs
 const apprenticeRegister = ref("");
@@ -160,6 +188,8 @@ let technicalInstructorEmail = ref("");
 
 let projectInstructorName = ref("");
 let projectInstructorEmail = ref("");
+
+const filteredRows = ref([]);
 
 const rows = ref([]);
 const columns = ref([
@@ -263,11 +293,6 @@ async function getInformation() {
     apprenticeResponse = await getData("Apprentice/listallapprentice");
     modalityResponse = await getData("Modality/listallmodality");
 
-    console.log('response from assignments:  ', assignmentResponse);
-    console.log('response from registers:  ', registerResponse);
-    
-    
-
     const apprenticesInRegisters = registerResponse.register
   .map(register => ({
     apprenticeId: register.idApprentice[0],
@@ -306,11 +331,7 @@ async function getInformation() {
       const assignment = registerResponse.register.find(
         register => register.assignment
       );
-
-      console.log('assignment: ', assignment);
-      console.log('register: ', register);
-      
-      
+            
       return {
         numberList: rows.value.length + 1, // Contador para la columna N°
         apprenticeName: `${apprentice?.firstName || ""} ${apprentice?.lastName || ""}`,
@@ -324,7 +345,7 @@ async function getInformation() {
         registerId: register._id,
       };
     });
-
+    applyFilters();
     console.log("Datos combinados para la tabla: ", rows.value);
   } catch (error) {
     console.log("Error en getInformation: ", error);
@@ -483,78 +504,97 @@ watch(
   { immediate: true } // Para que también se ejecute al inicializar el componente
 );
 
-    async function saveAssignment() {
+async function saveAssignment() {
   try {
-    // Inicializamos assignmentData con una estructura vacía
+    // Inicializamos assignmentData con la estructura correcta
     const assignmentData = {
-      assignment: {},
+      assignment: [
+        {
+          followupInstructor: [],
+          technicalInstructor: [],
+          projectInstructor: [],
+        },
+      ],
     };
 
     // Validamos y añadimos cada instructor dependiendo de si fue seleccionado
     if (followupInstructor.value) {
-      assignmentData.assignment.followupInstructor = [
-        {
-          idInstructor: followupInstructor.value.instructorId,
-          name: followUpInstructorName.value,
-          email: followUpInstructorEmail.value,
-        },
-      ];
+      assignmentData.assignment[0].followupInstructor.push({
+        idInstructor: followupInstructor.value.instructorId,
+        name: followUpInstructorName.value,
+        email: followUpInstructorEmail.value,
+      });
     }
 
     if (technicalInstructor.value) {
-      assignmentData.assignment.technicalInstructor = [
-        {
-          idInstructor: technicalInstructor.value.instructorId,
-          name: technicalInstructorName.value,
-          email: technicalInstructorEmail.value,
-        },
-      ];
+      assignmentData.assignment[0].technicalInstructor.push({
+        idInstructor: technicalInstructor.value.instructorId,
+        name: technicalInstructorName.value,
+        email: technicalInstructorEmail.value,
+      });
     }
 
     if (projectInstructor.value) {
-      assignmentData.assignment.projectInstructor = [
-        {
-          idInstructor: projectInstructor.value.instructorId,
-          name: projectInstructorName.value,
-          email: projectInstructorEmail.value,
-        },
-      ];
+      assignmentData.assignment[0].projectInstructor.push({
+        idInstructor: projectInstructor.value.instructorId,
+        name: projectInstructorName.value,
+        email: projectInstructorEmail.value,
+      });
+    }
+
+    // Eliminar propiedades con arrays vacíos del objeto assignment[0]
+    for (const key in assignmentData.assignment[0]) {
+      if (
+        Array.isArray(assignmentData.assignment[0][key]) &&
+        assignmentData.assignment[0][key].length === 0
+      ) {
+        delete assignmentData.assignment[0][key];
+      }
     }
 
     // Log para verificar qué datos se están enviando
     console.log("Datos preparados para guardar:", assignmentData);
 
     // Validación mínima para asegurarte de que al menos un instructor esté seleccionado
-    if (Object.keys(assignmentData.assignment).length === 0) {
+    const hasInstructors = Object.keys(assignmentData.assignment[0]).length > 0;
+
+    if (!hasInstructors) {
       notifyErrorRequest("Debes seleccionar al menos un instructor");
       return;
     }
+
+    // Logs adicionales para depurar
     console.log("assignmentData: ", assignmentData);
-
     console.log("apprenticeRegister: ", apprenticeRegister);
-    
 
+    // Determinar si es una edición o una nueva asignación
     if (dialogTitle.value === "EDITAR ASIGNACIÓN") {
       console.log(idAssignment);
 
-      let response = await putData(
+      await putData(
         `Register/updateassignmentbyid/${apprenticeRegister.value.registerId}`,
         assignmentData
       );
 
       notifySuccessRequest("Asignación editada exitosamente");
-    } else{
-      let response = await putData(`Register/addassignment/${apprenticeRegister.value.registerId}`, assignmentData);
+    } else {
+      await putData(
+        `Register/addassignment/${apprenticeRegister.value.registerId}`,
+        assignmentData
+      );
+
       notifySuccessRequest("Asignación guardada exitosamente");
     }
+
+    // Cerrar el diálogo y actualizar la información
     dialog.value = false;
     await getInformation();
   } catch (error) {
     notifyErrorRequest("Ocurrió un error al guardar la asignación");
-    console.log(error);
+    console.error(error);
   }
-
 }
+
 
 
 function toggleDrawer() {
@@ -615,35 +655,6 @@ async function toggleStatus(row) {
 };
 
 async function editAssignmentModal(row) {
-// const selectApprenticeValue = apprenticeOptions.value.find(
-//   (apprentice) => apprentice.apprenticeId === row.apprentice
-// );
-// apprentice.value = selectApprenticeValue ? selectApprenticeValue.apprenticeId : "";
-
-// const selectProjectInstructorValue = instructorOptions.value.find(
-//   (instructor) => instructor.instructorId === row.projectInstructor
-// );
-// projectInstructor.value = selectProjectInstructorValue ? selectProjectInstructorValue.instructorId : "";
-
-// const selectFollowupInstructorValue = instructorOptions.value.find(
-//   (instructor) => instructor.instructorId === row.followupInstructor
-// );
-// followupInstructor.value = selectFollowupInstructorValue ? selectFollowupInstructorValue.instructorId : "";
-
-// const selectTechnicalInstructorValue = instructorOptions.value.find(
-//   (instructor) => instructor.instructorId === row.technicalInstructor
-// );
-// technicalInstructor.value = selectTechnicalInstructorValue ? selectTechnicalInstructorValue.instructorId : "";
-
-// console.log(row.projectInstructor);
-
-// dialogTitle.value = "EDITAR ASIGNACIÓN";
-
-
-// // await getRegisterByApprentice(row._id);
-
-// dialog.value = true;
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 console.log('row in editAssignmentModal: ', row);
 
@@ -662,4 +673,54 @@ console.log('row in editAssignmentModal: ', row);
   dialog.value = true;
 
 };
+
+const placeholderText = computed(() => {
+  switch (selectedFilter.value) {
+    case "followupInstructor":
+      return "Nombre del instructor";
+    case "technicalInstructor":
+    return "Nombre del instructor";
+    case "projectInstructor":
+    return "Nombre del instructor";
+    default:
+      return "Buscar por...";
+  }
+});
+
+
+function applyFilters() {
+  const searchValue = pursuitOfAssignment.value.trim().toLowerCase(); // Convertir la búsqueda a minúsculas
+
+  // Si no hay texto o filtro seleccionado, mostramos todas las filas
+  if (!searchValue || !selectedFilter.value) {
+    filteredRows.value = rows.value;
+    return;
+  }
+
+  // Aplicar filtros basados en el filtro seleccionado
+  switch (selectedFilter.value) {
+    case "followupInstructor":
+      filteredRows.value = rows.value.filter((row) =>
+        row.followupInstructor.toLowerCase().includes(searchValue)
+      );
+      break;
+    case "technicalInstructor":
+      filteredRows.value = rows.value.filter((row) =>
+        row.technicalInstructor.toLowerCase().includes(searchValue)
+      );
+      break;
+      case "projectInstructor":
+      filteredRows.value = rows.value.filter((row) =>
+        row.projectInstructor.toLowerCase().includes(searchValue)
+      );
+      break;
+    default:
+      // Si no hay filtro válido, devolver todas las filas
+      filteredRows.value = rows.value;
+  }
+}
+
+// Escuchar cambios en los valores de búsqueda y filtro
+watch([pursuitOfAssignment, selectedFilter], applyFilters);
+
 </script>

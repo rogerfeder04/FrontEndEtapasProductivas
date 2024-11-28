@@ -247,6 +247,16 @@ th.text-center {
   color: $primary !important;
 }
 
+.q-linear-progress {
+  background-color: white !important;
+  height: 3px !important;
+}
+
+.q-linear-progress__track {
+  background-color: white !important;
+
+}
+
 td {
   padding: 1% !important;
 }
