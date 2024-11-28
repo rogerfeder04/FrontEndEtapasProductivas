@@ -38,6 +38,7 @@
           :rows="filteredRows"
           :columns="columns"
           :loading="loading"
+          :goTo="seeApprentices"
         ></Table>
       </div>
     </q-page-container>
@@ -53,8 +54,10 @@ import RadioButton from "@/components/buttons/RadioButton.vue"
 import CustomInput from "@/components/inputs/CustomInput.vue";
 import Footer from "@/components/layouts/Footer.vue"
 import Table from "@/components/tables/TableWithButtons.vue";
+import { useRouter } from "vue-router";
 import { getData } from "@/services/apiClient.js";
 
+const router = useRouter();
 const title = ref("FICHAS");
 const pursuitOfFiche = ref("");
 const selectedFilter = ref("");
@@ -125,6 +128,13 @@ async function getFiches() {
 
 function toggleDrawer() {
   drawerOpen.value = !drawerOpen.value;
+}
+
+async function seeApprentices(row) {
+  router.push({
+    path: "/apprentices",
+    query: { ficheId: row._id },
+  });
 }
 
 const placeholderText = computed(() => {

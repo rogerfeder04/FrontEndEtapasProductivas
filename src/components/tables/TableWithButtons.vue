@@ -77,8 +77,7 @@
           <TableButton
             class="buttonWhitEyeIcon"
             :icon="['fa', 'eye']"
-            :loading="props.row.loading"
-            :onClick="() => onClickOpenModal(props.row)"
+            :onClick="() => goTo(props.row)"
           />
         </q-td>
       </template>
@@ -166,7 +165,7 @@ const props = defineProps({
   onClickToggleStatus: {
     type: Function,
   },
-  onClickOpenModal: {
+  goTo: {
     type: Function,
   },
   getActions: {

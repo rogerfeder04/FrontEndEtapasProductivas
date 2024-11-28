@@ -35,7 +35,6 @@
 
         <CustomButton 
           label="Subir Archivo" 
-          :onClickFunction="uploadFile"
           :icon="['fa', 'file-arrow-up']"
           >
         </CustomButton>
@@ -216,10 +215,12 @@ import FormModal from "@/components/modals/FormModal.vue";
 import CustomInput from "@/components/inputs/CustomInput.vue";
 import RadioButton from "@/components/buttons/RadioButton.vue"
 import CustomSelect from "@/components/inputs/CustomSelect.vue";
+import { useRoute } from "vue-router";
 import { notifyErrorRequest, notifySuccessRequest} from "@/composables/Notify.vue";
 
 import { getData, postData, putData } from "@/services/apiClient.js";
 
+const route = useRoute();
 const title = ref("APRENDICES");
 const dialog = ref(false);
 const dialogTitle = ref("CREAR APRENDIZ");
@@ -335,6 +336,20 @@ onBeforeMount(() => {
 async function getApprentices() {
   try {
     loading.value = true
+
+    const ficheId = route.query.ficheId;
+    if (ficheId) {
+      console.log('ficheId: ', ficheId);
+      
+      // Si hay un `ficheId`, cargar solo los aprendices de esa ficha
+      const response = await getData(`/Apprentice/listapprenticebyfiche/${ficheId}`);
+      console.log('response from getApprenticesByFiche: ', response);
+      
+      rows.value = response.data.map((apprentice, index) => ({
+        ...apprentice,
+        index: index + 1, // Contador para la columna "N°"
+      }));
+    } else {
   let response = await getData("Apprentice/listallapprentice");
   
   const dataFromApprentices = response.apprentices.map((apprentice) => ({
@@ -347,7 +362,7 @@ async function getApprentices() {
     index: index + 1,
   }));
 
-  applyFilters();
+  applyFilters();}
   console.log("rows:  ", rows.value);
 
 } catch (error) {
