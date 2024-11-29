@@ -229,7 +229,7 @@ const selectedFilter = ref("");
 const pursuitOfApprentice =ref("")
 let loading = ref(false)
 
-
+let NameForEditSelect = ref ("");
 //v-models de los inputs
 const fiche = ref("");
 const tpDocOptions = ref(["CC", "TI"]);
@@ -301,13 +301,13 @@ const columns = ref([
     name: "fiche",
     label: "FICHA",
     align: "center",
-    field: (row) => row.fiche.name,
+    field: (row) => row.fiche?.name,
   },
   {
     name: "ficheCode",
     label: "COD. FICHA",
     align: "center",
-    field: (row) => row.fiche.number,
+    field: (row) => row.fiche?.number,
     sortable: true,
   },
   {
@@ -356,6 +356,8 @@ async function getApprentices() {
     idApprentice: apprentice._id,
   }));
   console.log("response from getApprentices: ", response);
+  console.log('filteredRows:  ', filteredRows);
+  
 
   rows.value = response.apprentices.map((apprentice, index) => ({
     ...apprentice,
@@ -436,7 +438,7 @@ async function getRegisterByApprentice(id) {
     loading.value = false
   }
 }
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 function toggleDrawer() {
   drawerOpen.value = !drawerOpen.value;
@@ -473,43 +475,89 @@ async function filterFiche(val, update) {
   });
 }
 
+// const saveApprentice = async () => {
+//   try {
+//     const apprenticeData = {
+//       fiche: fiche.value,
+//       CustomselectName: fiche.value,
+//       tpDocument: tpDocument.value,
+//       numDocument: numDocument.value,
+//       modality: modality.value._id,
+//       firstName: firstName.value,
+//       lastName: lastName.value,
+//       phone: phone.value,
+//       personalEmail: personalEmail.value,
+//       institutionalEmail: institutionalEmail.value,
+
+//     };
+//     console.log("apprenticeData: ", apprenticeData);
+
+//     if (dialogTitle.value === "EDITAR APRENDIZ") {
+//       console.log(idApprentice);
+
+//       let response = await putData(
+//         `Apprentice/updateapprenticebyid/${idApprentice.value}`,
+//         apprenticeData
+//       );
+
+//       notifySuccessRequest("Aprendiz editado exitosamente");
+//     } else {
+//       let response = await postData("Apprentice/addapprentice", apprenticeData);
+//       notifySuccessRequest("Aprendiz guardado exitosamente");
+//     }
+//     dialog.value = false;
+//     await getApprentices();
+//   } catch (error) {
+//     notifyErrorRequest("Ocurrió un error al guardar el aprendiz");
+//     console.log(error);
+//   }
+// };
+
+
+
+
 const saveApprentice = async () => {
   try {
     const apprenticeData = {
-      fiche: fiche.value,
-      CustomselectName: fiche.value,
+      fiche: {
+        idFiche: fiche.value.idFiche,
+        name: fiche.value.name,
+        number: fiche.value.number,
+      },
       tpDocument: tpDocument.value,
       numDocument: numDocument.value,
-      modality: modality.value._id,
+      modality: modality.value?._id || "",
       firstName: firstName.value,
       lastName: lastName.value,
       phone: phone.value,
       personalEmail: personalEmail.value,
       institutionalEmail: institutionalEmail.value,
-
     };
+
     console.log("apprenticeData: ", apprenticeData);
 
     if (dialogTitle.value === "EDITAR APRENDIZ") {
-      console.log(idApprentice);
-
-      let response = await putData(
+      const response = await putData(
         `Apprentice/updateapprenticebyid/${idApprentice.value}`,
         apprenticeData
       );
-
       notifySuccessRequest("Aprendiz editado exitosamente");
     } else {
-      let response = await postData("Apprentice/addapprentice", apprenticeData);
+      const response = await postData("Apprentice/addapprentice", apprenticeData);
       notifySuccessRequest("Aprendiz guardado exitosamente");
     }
+
     dialog.value = false;
     await getApprentices();
   } catch (error) {
     notifyErrorRequest("Ocurrió un error al guardar el aprendiz");
-    console.log(error);
+    console.error(error);
   }
 };
+
+
+
+
 
 
 async function toggleStatus(row) {
@@ -525,17 +573,40 @@ async function toggleStatus(row) {
   }
 };
 
+
+
 async function editApprenticeModal(row) {
   idApprentice.value = row._id;
 
-  const CustomSelectedFiche = fichesOptions.value.find(
-    (fiche) => fiche.idFiche === row.fiche.idFiche
-  );
-console.log('CustomSelectedFiche:   ', CustomSelectedFiche);
+  // Verificar si `row.fiche` existe antes de acceder a sus propiedades
+  if (row.fiche && row.fiche.idFiche) {
+    // Buscar la ficha en las opciones disponibles
+    const CustomselectedFiche = fichesOptions.value.find(
+      (fiche) => fiche.idFiche === row.fiche.idFiche
+    );
 
-  const NameForEditSelect = CustomSelectedFiche
-  fiche.value = CustomSelectedFiche ? CustomSelectedFiche.idFiche : "";
+    // Asignar los valores encontrados o valores vacíos si no se encuentra
+    fiche.value = CustomselectedFiche
+      ? {
+          idFiche: CustomselectedFiche.idFiche,
+          name: CustomselectedFiche.name,
+          number: CustomselectedFiche.number,
+        }
+      : {
+          idFiche: "",
+          name: "",
+          number: "",
+        };
+  } else {
+    // Si no hay ficha asociada, asignar valores vacíos
+    fiche.value = {
+      idFiche: "",
+      name: "",
+      number: "",
+    };
+  }
 
+  // Asignar otros campos al modal
   tpDocument.value = row.tpDocument;
   numDocument.value = row.numDocument;
   firstName.value = row.firstName;
@@ -544,15 +615,18 @@ console.log('CustomSelectedFiche:   ', CustomSelectedFiche);
   institutionalEmail.value = row.institutionalEmail;
   personalEmail.value = row.personalEmail;
 
-
   console.log(row.fiche);
 
+  // Obtener registros relacionados
   await getRegisterByApprentice(row._id);
 
   dialogTitle.value = "EDITAR APRENDIZ";
-
   dialog.value = true;
-};
+}
+
+
+
+
 
 
 const placeholderText = computed(() => {
